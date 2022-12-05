@@ -5,6 +5,14 @@
   (:require
    [cheshire.core :as json]))
 
+(defn rs [v]
+  (if (string? v)
+    (let [vs (if-let [v (re-seq #"(\d+),(\d+)" v)]
+               (let [[a b c] (first v)] (str b "." c))
+               v)]
+      (read-string vs))
+    v))
+
 (def not-nil? (comp not nil?))
 
 (def om (ObjectMapper.))
@@ -28,14 +36,16 @@
 (defn default-json-response
   [route-name
    http-status
-   body-fn
-   om-json]
+   req-fn
+   & {:keys [om-json has-body] :or [om-json false has-body false]}]
   {:name route-name
    :enter
    (fn [context]
      (let [req (:request context)
-           body (json-req-parse req)
-           result (body-fn body req)
+           result (if (= has-body true)
+                    (let [body (json-req-parse req)]
+                      (req-fn body req))
+                    (req-fn  req))
            response (if (= om-json true)
                       (om->json result)
                       (json-response result http-status))]

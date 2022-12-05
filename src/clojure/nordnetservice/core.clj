@@ -1,8 +1,10 @@
 (ns nordnetservice.core
-  (:gen-class))
+  (:gen-class)
+  (:require [nordnetservice.config :as config]))
+  ;(:import (harborview.dto.html.options StockPriceAndOptions OptionDTO)))
 
 
-
+(defn stock-options [ctx oid])
 
 ;; (defn stock-options
 ;;   "Map -> Int -> [OptionDTO]"

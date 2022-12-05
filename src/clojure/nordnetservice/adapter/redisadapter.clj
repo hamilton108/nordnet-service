@@ -10,6 +10,7 @@
     LocalDate
     ZoneId
     ZoneOffset)
+   (nordnet.financial OpeningPrices)
    (nordnet.downloader URLInfo)))
 
 (def EUROPE_OSLO (ZoneId/of "Europe/Oslo"))
@@ -65,3 +66,10 @@
 (defn demo-url [ctx]
   (let [j (jedis ctx)]
     (.get j "demo-url")))
+
+(defrecord OpeningPricesImpl [ctx]
+  OpeningPrices
+  (fetchPrice [_ ticker]
+    (let [j (jedis ctx)
+          op (.hget j "openingprices" ticker)]
+      (Double/parseDouble op))))

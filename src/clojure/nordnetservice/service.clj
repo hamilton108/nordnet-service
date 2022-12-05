@@ -2,15 +2,18 @@
   (:gen-class)
   (:require
    [nordnetservice.common :refer [default-json-response]]
+   [nordnetservice.config  :refer [get-context]]
    [nordnetservice.core :as core]
    [io.pedestal.http :as http]
    [io.pedestal.http.route :as route]))
 
+(def env :demo)
 
+(def ctx (get-context env))
 
 (def stockoptions
-  (default-json-response ::stockoptions 200 true
-                         (fn [_ _])))
+  (default-json-response ::stockoptions 200 :om-json true :has-body false
+                         (fn [req])))
 
 
 (def routes
@@ -31,7 +34,7 @@
 
 ;; Consumed by nordnet-service.server/create-server
 ;; See http/default-interceptors for additional options you can configure
-(def service {:env :prod
+(def service {:env env
               ;; You can bring your own non-default interceptors. Make
               ;; sure you include routing and set it up right for
               ;; dev-mode. If you do, many other keys for configuring

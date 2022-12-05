@@ -28,11 +28,11 @@
 ;;       server/create-server
 ;;       server/start))
 
-;; (defn -main
-;;   "The entry-point for 'lein run'"
-;;   [& args]
-;;   (println "\nCreating your server...")
-;;   (server/start runnable-service))
+(defn -main
+  "The entry-point for 'lein run'"
+  [& args]
+  (println "\nCreating your server...")
+  (server/start runnable-service))
 
 ;; If you package the service up as a WAR,
 ;; some form of the following function sections is required (for io.pedestal.servlet.ClojureVarServlet).

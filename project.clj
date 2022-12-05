@@ -38,8 +38,12 @@
                  [rcstadheim/oahu "3.0.0-20220413.092122-1"]
                  [rcstadheim/vega "3.0.0-20220413.092302-1"]]
   :min-lein-version "2.0.0"
-  :resource-paths ["config", "resources"]
   :repositories {"project" "file:/home/rcs/opt/java/mavenlocalrepo"}
+  ;:resource-paths ["src/resources"]
+  :source-paths ["src/clojure"]
+  :test-paths ["test"]
+  :resource-paths ["config", "resources"]
+  :java-source-paths ["src/java"]
   ;; If you use HTTP/2 or ALPN, use the java-agent to pull in the correct alpn-boot dependency
   ;:java-agents [[org.mortbay.jetty.alpn/jetty-alpn-agent "2.0.5"]]
   :profiles {:dev {:aliases {"run-dev" ["trampoline" "run" "-m" "nordnet-service.server/run-dev"]}
