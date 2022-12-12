@@ -17,11 +17,11 @@
 (defn url->page [url]
   (PageInfo. (.getPage web-client url) nil nil))
 
-(defrecord DemoDownloader []
+(defrecord TestDownloader [env]
   Downloader
   (download [_ _]
-    (let [url (redis/demo-url :demo)]
-      (url->page url))))
+    (let [url (redis/test-url env)]
+      [(url->page url)])))
 
 (defrecord DefaultDownloader []
   Downloader

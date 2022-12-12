@@ -1,7 +1,7 @@
 (ns nordnetservice.adapter.redisadapter
   (:require
-   [nordnetservice.common :refer [not-nil?]])
-  ;[clojure.core.match :refer [match]])
+   [nordnetservice.common :refer [not-nil?]]
+   [clojure.core.match :refer [match]])
   (:import
    (java.net URL)
    (redis.clients.jedis Jedis)
@@ -17,11 +17,12 @@
 
 (def jedis
   (memoize
-   (fn [ctx]
+   (fn [env]
      (let [j (Jedis. "172.20.1.2" 6379)]
-       (if (= :prod ctx)
-         (.select j 0)
-         (.select j 5))
+       (match env
+         :prod (.select j 0)
+         :demo (.select j 4)
+         :test (.select j 5))
        j))))
 
 (defn url-path-query-for
@@ -63,9 +64,10 @@
         millis (nordnet-millis dx)]
     (filterv not-nil? (map (partial exp-fn ticker millis) exp))))
 
-(defn demo-url [ctx]
-  (let [j (jedis ctx)]
-    (.get j "demo-url")))
+(defn test-url [env]
+  (let [j (jedis env)
+        test-url (if (= env :test) "test-url" "demo-url")]
+    (.get j test-url)))
 
 (defrecord OpeningPricesImpl [ctx]
   OpeningPrices

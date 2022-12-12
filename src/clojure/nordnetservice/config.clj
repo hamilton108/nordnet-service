@@ -7,9 +7,10 @@
   (:import
    (nordnet.html StockOptionParser3)
    (vega.financial.calculator BlackScholes)
+   (nordnetservice.factory StockMarketFactory)
    (critter.util StockOptionUtil)
    (nordnetservice.adapter.downloadadapter
-    DemoDownloader
+    TestDownloader
     DefaultDownloader)
    (nordnetservice.adapter.redisadapter OpeningPricesImpl)
    (java.time LocalDate)))
@@ -33,21 +34,28 @@
     :demo
     (StockOptionUtil. (LocalDate/of 2022 10 17))))
 
-(defn repos [env]
-  stock-market-repos env)
+(defn repos [env factory]
+  (stock-market-repos env factory))
 
-(defn etrade [env]
+(defn etrade [env factory]
   (let [calc (BlackScholes.)]
-    (StockOptionParser3. calc (redis env) (repos env) (stock-option-util env))))
+    (prn env)
+    (StockOptionParser3. calc (redis env) (repos env factory) (stock-option-util env))))
+
+(defn factory [env]
+  (StockMarketFactory. (stock-option-util env)))
 
 (defn downloader [env]
   (match env
     :prod
     (DefaultDownloader.)
     :else
-    (DemoDownloader.)))
+    (TestDownloader. env)))
 
 (defn get-context [env]
-  {:etrade (etrade env)
-   :dl (downloader env)
-   :purchase-type (if (= :prod env) 4 11)})
+  (let [f (factory env)]
+    {:etrade (etrade env f)
+     :dl (downloader env)
+     :factory f
+     :env env
+     :purchase-type (if (= :prod env) 4 11)}))

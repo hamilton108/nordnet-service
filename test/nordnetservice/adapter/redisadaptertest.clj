@@ -15,6 +15,10 @@
     ;(doseq [u url] (prn (.getUrl u)))
     (is (= (.length url) 8))))
 
+(deftest test-test-url
+  (let [tu (redis/test-url :test)]
+    (is (= "file:////home/rcs/opt/java/nordnet-repos/src/integrationTest/resources/html/derivatives/YAR-3.html" tu))))
+
 ;; (deftest test-demo-url
 ;;   (let [url (redis/demo-url :demo)]
 ;;     (is (= "s" url))))

@@ -1,6 +1,6 @@
 package nordnetservice.dto;
 
-import harborview.dto.html.StockPriceDTO;
+import nordnetservice.dto.StockPriceDTO;
 import java.util.List;
 
 public class StockPriceAndOptions {

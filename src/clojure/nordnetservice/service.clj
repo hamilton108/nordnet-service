@@ -1,7 +1,7 @@
 (ns nordnetservice.service
   (:gen-class)
   (:require
-   [nordnetservice.common :refer [default-json-response]]
+   [nordnetservice.common :refer [default-json-response req-oid]]
    [nordnetservice.config  :refer [get-context]]
    [nordnetservice.core :as core]
    [io.pedestal.http :as http]
@@ -12,9 +12,13 @@
 (def ctx (get-context env))
 
 (def stockoptions
-  (default-json-response ::stockoptions 200 :om-json true :has-body false
-                         (fn [req])))
+  (default-json-response ::stockoptions 200  true false
+                         (fn [req]
+                           (let [oid (req-oid req)]
+                             (core/stock-options ctx oid)))))
 
+(defn demo []
+  (core/stock-options ctx 3))
 
 (def routes
   (route/expand-routes
