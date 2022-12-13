@@ -32,7 +32,7 @@
     :test
     (StockOptionUtil. (LocalDate/of 2022 5 25))
     :demo
-    (StockOptionUtil. (LocalDate/of 2022 10 17))))
+    (StockOptionUtil. (LocalDate/of 2022 1 1))))
 
 (defn repos [env factory]
   (stock-market-repos env factory))

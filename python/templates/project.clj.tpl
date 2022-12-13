@@ -7,8 +7,10 @@
                  [org.clojure/core.match "1.0.0"]
                  [org.jsoup/jsoup "1.11.3"]
 
-                 [io.pedestal/pedestal.service "0.5.11-beta-1"]
-                 [io.pedestal/pedestal.jetty "0.5.11-beta-1"]
+                 [io.pedestal/pedestal.service "0.5.8"]
+                 [io.pedestal/pedestal.jetty "0.5.8"]
+                 ;;  [io.pedestal/pedestal.service "0.5.11-beta-1"]
+                 ;;  [io.pedestal/pedestal.jetty "0.5.11-beta-1"]
                  ;; [io.pedestal/pedestal.immutant "0.5.11-beta-1"]
                  ;; [io.pedestal/pedestal.tomcat "0.5.11-beta-1"]
 
@@ -19,9 +21,10 @@
 
                 ;------------------ Logging  ------------------ 
                  [ch.qos.logback/logback-classic "1.2.10" :exclusions [org.slf4j/slf4j-api]]
-                 [org.slf4j/jul-to-slf4j "1.7.35"]
-                 [org.slf4j/jcl-over-slf4j "1.7.35"]
-                 [org.slf4j/log4j-over-slf4j "1.7.35"]
+                 ;[org.slf4j/jul-to-slf4j "1.7.35"]
+                 ;[org.slf4j/jcl-over-slf4j "1.7.35"]
+                 ;[org.slf4j/log4j-over-slf4j "1.7.35"]
+
 
                 ;------------------ Jackson ------------------ 
                  [com.fasterxml.jackson.core/jackson-core "2.10.2"]
@@ -32,11 +35,16 @@
                  [net.sourceforge.htmlunit/htmlunit "2.44.0"
                   :exclusions [org.eclipse.jetty/jetty-http org.eclipse.jetty/jetty-io]]
 
+                ;------------------ Diverse  ------------------ 
+                 [colt/colt "1.2.0"]
+                 ;[org.clojure/core.cache "1.0.207"]
+                 [com.github.ben-manes.caffeine/caffeine "3.1.2"]
+
                 ;------------------ Local libs ------------------ 
-                 [rcstadheim/critter-repos "${critters}"]
-                 [rcstadheim/nordnet-repos "${nordnet}"]
-                 [rcstadheim/oahu "${oahu}"]
-                 [rcstadheim/vega "${vega}"]]
+                 [rcstadheim/critter-repos "3.0.0-20221015.095752-16"]
+                 [rcstadheim/nordnet-repos "3.0.0-20221207.085301-10"]
+                 [rcstadheim/oahu "3.0.0-20220413.092122-1"]
+                 [rcstadheim/vega "3.0.0-20220413.092302-1"]]
   :min-lein-version "2.0.0"
   :repositories {"project" "file:/home/rcs/opt/java/mavenlocalrepo"}
   :source-paths ["src/clojure"]
@@ -47,5 +55,5 @@
   ;:java-agents [[org.mortbay.jetty.alpn/jetty-alpn-agent "2.0.5"]]
   :profiles {:dev {:aliases {"run-dev" ["trampoline" "run" "-m" "nordnet-service.server/run-dev"]}
                    :dependencies [[io.pedestal/pedestal.service-tools "0.5.11-beta-1"]]}
-             :uberjar {:aot [nordnet-service.server]}}
-  :main ^{:skip-aot true} nordnet-service.server)
+             :uberjar {:aot [nordnetservice.server]}}
+  :main ^{:skip-aot true} nordnetservice.server)

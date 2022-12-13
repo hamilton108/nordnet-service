@@ -7,8 +7,10 @@
                  [org.clojure/core.match "1.0.0"]
                  [org.jsoup/jsoup "1.11.3"]
 
-                 [io.pedestal/pedestal.service "0.5.11-beta-1"]
-                 [io.pedestal/pedestal.jetty "0.5.11-beta-1"]
+                 [io.pedestal/pedestal.service "0.5.8"]
+                 [io.pedestal/pedestal.jetty "0.5.8"]
+                 ;;  [io.pedestal/pedestal.service "0.5.11-beta-1"]
+                 ;;  [io.pedestal/pedestal.jetty "0.5.11-beta-1"]
                  ;; [io.pedestal/pedestal.immutant "0.5.11-beta-1"]
                  ;; [io.pedestal/pedestal.tomcat "0.5.11-beta-1"]
 
@@ -19,9 +21,10 @@
 
                 ;------------------ Logging  ------------------ 
                  [ch.qos.logback/logback-classic "1.2.10" :exclusions [org.slf4j/slf4j-api]]
-                 [org.slf4j/jul-to-slf4j "1.7.35"]
-                 [org.slf4j/jcl-over-slf4j "1.7.35"]
-                 [org.slf4j/log4j-over-slf4j "1.7.35"]
+                 ;[org.slf4j/jul-to-slf4j "1.7.35"]
+                 ;[org.slf4j/jcl-over-slf4j "1.7.35"]
+                 ;[org.slf4j/log4j-over-slf4j "1.7.35"]
+
 
                 ;------------------ Jackson ------------------ 
                  [com.fasterxml.jackson.core/jackson-core "2.10.2"]
@@ -31,6 +34,11 @@
                 ;------------------ Web  ------------------ 
                  [net.sourceforge.htmlunit/htmlunit "2.44.0"
                   :exclusions [org.eclipse.jetty/jetty-http org.eclipse.jetty/jetty-io]]
+
+                ;------------------ Diverse  ------------------ 
+                 [colt/colt "1.2.0"]
+                 ;[org.clojure/core.cache "1.0.207"]
+                 [com.github.ben-manes.caffeine/caffeine "3.1.2"]
 
                 ;------------------ Local libs ------------------ 
                  [rcstadheim/critter-repos "3.0.0-20221015.095752-16"]

@@ -11,18 +11,16 @@
 
 (def ctx (get-context env))
 
+
 (def stockoptions
-  (default-json-response ::stockoptions 200  true false
+  (default-json-response ::stockoptions 200 true
                          (fn [req]
                            (let [oid (req-oid req)]
                              (core/stock-options ctx oid)))))
 
-(defn demo []
-  (core/stock-options ctx 3))
-
 (def routes
   (route/expand-routes
-   #{["/stockoptions:oid" :get stockoptions]}))
+   #{["/stockoptions/:oid" :get stockoptions]}))
 
 ;; Map-based routes
 ;(def routes `{"/" {:interceptors [(body-params/body-params) http/html-body]
@@ -46,6 +44,7 @@
               ;; ::http/interceptors []
               ::http/routes routes
 
+              ::http/secure-headers {:content-security-policy-settings {:object-src "'none'"}}
               ;; Uncomment next line to enable CORS support, add
               ;; string(s) specifying scheme, host and port for
               ;; allowed source(s):
