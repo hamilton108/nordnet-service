@@ -8,7 +8,6 @@
    (com.gargoylesoftware.htmlunit WebClient)
    (nordnet.downloader PageInfo)))
 
-
 (def web-client
   (let [result (WebClient.)]
     (-> result .getOptions (.setJavaScriptEnabled false))

@@ -1,19 +1,15 @@
 (ns nordnetservice.adapter.redisadapter
   (:require
    [nordnetservice.common :refer [not-nil?]]
+   [nordnetservice.stockoption :refer [nordnet-millis]]
    [clojure.core.match :refer [match]])
   (:import
+   (java.time LocalDate)
    (java.net URL)
    (redis.clients.jedis Jedis)
-   (java.time.chrono ChronoLocalDateTime)
-   (java.time
-    LocalDate
-    ZoneId
-    ZoneOffset)
    (nordnet.financial OpeningPrices)
    (nordnet.downloader URLInfo)))
 
-(def EUROPE_OSLO (ZoneId/of "Europe/Oslo"))
 
 (def jedis
   (memoize
@@ -35,16 +31,6 @@
   [^String ticker
    ^String nordnetUnixTime]
   (URL. "https" "www.nordnet.no" (url-path-query-for ticker nordnetUnixTime)))
-
-(defn nordnet-millis
-  "LocalDate -> long"
-  [^LocalDate dx]
-  (let [tm ^ChronoLocalDateTime (.atStartOfDay dx)
-        zone (.atZone tm EUROPE_OSLO)
-        ltm (.toLocalDateTime zone)
-        inst (.toInstant ltm ZoneOffset/UTC)
-        epoch (.getEpochSecond inst)]
-    (* epoch 1000)))
 
 (defn exp-fn
   [^String ticker

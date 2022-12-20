@@ -40,6 +40,7 @@
                  ;[org.clojure/core.cache "1.0.207"]
                  [com.github.ben-manes.caffeine/caffeine "3.1.2"]
 
+                 [clj-http "3.12.3"]
                 ;------------------ Local libs ------------------ 
                  [rcstadheim/critter-repos "3.0.0-20221015.095752-16"]
                  [rcstadheim/nordnet-repos "3.0.0-20221207.085301-10"]

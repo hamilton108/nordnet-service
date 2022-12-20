@@ -59,6 +59,27 @@
    17 "TOM"
    3  "YAR"})
 
+(def ticker->oid
+  {"AKSO" 18
+   "BAKKA" 27
+   "BWLPG" 26
+   "DNB" 19
+   "DNO" 20
+   "EQNR" 2
+   "GJF" 21
+   "GOGL" 28
+   "NHY" 1
+   "NAS" 29
+   "OBX" 7
+   "ORK" 9
+   "PGS" 12
+   "STB" 14
+   "SUBC" 23
+   "TEL" 6
+   "TGS" 16
+   "TOM" 17
+   "YAR" 3})
+
 
 (defn rs [v]
   (if (string? v)
@@ -137,3 +158,4 @@
 ;;      (assoc context
 ;;             :response {:status 500
 ;;                        :body (.getMessage ex-info)}))})
+

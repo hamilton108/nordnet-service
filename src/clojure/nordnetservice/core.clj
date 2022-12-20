@@ -26,16 +26,38 @@
         sp-dto (StockPriceDTO. sp)]
     (StockPriceAndOptions. sp-dto fm)))
 
-(defn stock-options [ctx oid]
-  (if-let [result (.getIfPresent ca oid)]
-    (do
-      (.info logger "Fetching from cache...")
-      result)
+(defn stock-options [ctx oid has-cache]
+  (if (= has-cache true)
+    (if-let [result (.getIfPresent ca oid)]
+      (do
+        (.info logger "Fetching from cache...")
+        result)
+      (let [result (fetch-stock-options ctx oid)]
+        (.info logger "Empty  cache...")
+        (.put ca oid result)
+        result))
     (let [result (fetch-stock-options ctx oid)]
-      (.info logger "Empty  cache...")
+      (.info logger "has-cache == false...")
       (.put ca oid result)
       result)))
 
+
+(defn calls-or-puts
+  [ctx
+   oid
+   is-call
+   has-cache]
+  (let [raw (stock-options ctx oid has-cache)
+        opts (filter #(= (.isCall %) is-call) (.getOptions raw))]
+    (StockPriceAndOptions. (.getStock raw) opts)))
+
+(defn calls [ctx oid has-cache]
+  (calls-or-puts ctx oid true has-cache))
+
+(defn puts [ctx oid has-cache]
+  (calls-or-puts ctx oid false has-cache))
+
+(defn find-option [ctx oid has-cache])
 
 ;; (defn stock-options
 ;;   "Map -> Int -> [OptionDTO]"
@@ -47,9 +69,9 @@
 ;;         opx (map #(OptionDTO. %) (.options etrade page sp))]
 ;;     opx))
 
-(defn demo []
-  (let [ctx (config/get-context :demo)]
-    (stock-options ctx 3)))
+;; (defn demo []
+;;   (let [ctx (config/get-context :demo)]
+;;     (stock-options ctx 3 true)))
 
 ;; (defn demo2 []
 ;;   (let [ctx (config/get-context :demo)]

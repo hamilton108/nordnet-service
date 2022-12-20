@@ -16,11 +16,53 @@
   (default-json-response ::stockoptions 200 true
                          (fn [req]
                            (let [oid (req-oid req)]
-                             (core/stock-options ctx oid)))))
+                             (core/stock-options ctx oid true)))))
+
+(def calls
+  (default-json-response ::calls 200 true
+                         (fn [req]
+                           (let [oid (req-oid req)]
+                             (core/calls ctx oid true)))))
+
+(def nocache-calls
+  (default-json-response ::nocache-calls 200 true
+                         (fn [req]
+                           (let [oid (req-oid req)]
+                             (core/calls ctx oid false)))))
+
+(def puts
+  (default-json-response ::puts 200 true
+                         (fn [req]
+                           (let [oid (req-oid req)]
+                             (core/puts ctx oid true)))))
+
+(def nocache-puts
+  (default-json-response ::nocache-puts 200 true
+                         (fn [req]
+                           (let [oid (req-oid req)]
+                             (core/puts ctx oid false)))))
+
+(def find-option
+  (default-json-response ::find-option 200 true
+                         (fn [req]
+                           (let [oid (req-oid req)]
+                             (core/find-option ctx oid true)))))
+
+(def nocache-find-option
+  (default-json-response ::nocache-find-option 200 true
+                         (fn [req]
+                           (let [oid (req-oid req)]
+                             (core/find-option ctx oid false)))))
 
 (def routes
   (route/expand-routes
-   #{["/stockoptions/:oid" :get stockoptions]}))
+   #{["/stockoptions/:oid" :get stockoptions]
+     ["/nocache/calls/:oid" :get nocache-calls]
+     ["/nocache/puts/:oid" :get nocache-puts]
+     ["/nocache/option/:ticker" :get nocache-find-option]
+     ["/calls/:oid" :get calls]
+     ["/puts/:oid" :get puts]
+     ["/option/:ticker" :get find-option]}))
 
 ;; Map-based routes
 ;(def routes `{"/" {:interceptors [(body-params/body-params) http/html-body]
@@ -68,7 +110,7 @@
               ;;  This can also be your own chain provider/server-fn -- http://pedestal.io/reference/architecture-overview#_chain_provider
               ::http/type :jetty
               ;;::http/host "localhost"
-              ::http/port 8080
+              ::http/port 8082
               ;; Options to pass to the container (Jetty)
               ::http/container-options {:h2c? true
                                         :h2? false
