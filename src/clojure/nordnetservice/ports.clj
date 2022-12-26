@@ -2,4 +2,5 @@
   (:gen-class))
 
 (defprotocol Downloader
-  (download [this ticker]))
+  (downloadAll [this ticker])
+  (downloadForOption [this optionticker]))

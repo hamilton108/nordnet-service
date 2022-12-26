@@ -1,7 +1,7 @@
 (ns nordnetservice.service
   (:gen-class)
   (:require
-   [nordnetservice.common :refer [default-json-response req-oid]]
+   [nordnetservice.common :refer [default-json-response req-oid option-ticker]]
    [nordnetservice.config  :refer [get-context]]
    [nordnetservice.core :as core]
    [io.pedestal.http :as http]
@@ -45,21 +45,19 @@
 (def find-option
   (default-json-response ::find-option 200 true
                          (fn [req]
-                           (let [oid (req-oid req)]
-                             (core/find-option ctx oid true)))))
+                           (core/find-option ctx (option-ticker req)))))
 
-(def nocache-find-option
-  (default-json-response ::nocache-find-option 200 true
-                         (fn [req]
-                           (let [oid (req-oid req)]
-                             (core/find-option ctx oid false)))))
+;; (def nocache-find-option
+;;   (default-json-response ::nocache-find-option 200 true
+;;                          (fn [req]
+;;                            (let [oid (req-oid req)]
+;;                              (core/find-option ctx oid false)))))
 
 (def routes
   (route/expand-routes
    #{["/stockoptions/:oid" :get stockoptions]
      ["/nocache/calls/:oid" :get nocache-calls]
      ["/nocache/puts/:oid" :get nocache-puts]
-     ["/nocache/option/:ticker" :get nocache-find-option]
      ["/calls/:oid" :get calls]
      ["/puts/:oid" :get puts]
      ["/option/:ticker" :get find-option]}))

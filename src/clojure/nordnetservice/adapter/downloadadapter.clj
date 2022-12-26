@@ -1,6 +1,9 @@
 (ns nordnetservice.adapter.downloadadapter
   (:gen-class)
   (:require
+   ;[nordnetservice.common :refer [nordnet-option-url]]
+   [nordnetservice.common :as common]
+   [nordnetservice.stockoption :as option]
    [nordnetservice.ports :refer [Downloader]]
    [nordnetservice.adapter.redisadapter :as redis])
   (:import
@@ -16,14 +19,35 @@
 (defn url->page [url]
   (PageInfo. (.getPage web-client url) nil nil))
 
+    ;; private String urlFileFor(String ticker, String nordnetUnixTime) {
+    ;;     return String.format("/market/options?currency=NOK&underlyingSymbol=%s&expireDate=%s", ticker,  nordnetUnixTime);
+    ;; }
+
+    ;; public URL urlFor(String ticker, String nordnetUnixTime) {
+    ;;     try {
+    ;;         return new URL("https", "www.nordnet.no",urlFileFor(ticker,nordnetUnixTime));
+
+
+
 (defrecord TestDownloader [env]
   Downloader
-  (download [_ _]
+  (downloadAll [_ _]
     (let [url (redis/test-url env)]
-      [(url->page url)])))
+      [(url->page url)]))
+  (downloadForOption [_ _]
+    (let [url (redis/test-url env)]
+      (url->page url))))
 
 (defrecord DefaultDownloader []
   Downloader
-  (download [_ ticker]
-    (let [urls (redis/url :prod ticker (LocalDate/now))]
-      (mapv url->page urls))))
+  (downloadAll [_ ticker]
+    (let [urls (redis/url-all :prod ticker (LocalDate/now))]
+      (mapv url->page urls)))
+  (downloadForOption [_ optionticker]
+    (let [info (option/stock-opt-info-ticker optionticker)
+          y (:year info)
+          m (:month info)
+          stock-ticker (:ticker info)
+          unixtime (option/millis-for y m)
+          url (common/url-for stock-ticker unixtime)]
+      (url->page url))))

@@ -1,6 +1,7 @@
 (ns nordnetservice.common
   (:gen-class)
   (:import
+   (java.net URL)
    (com.fasterxml.jackson.databind ObjectMapper))
   (:require
    [cheshire.core :as json]))
@@ -37,6 +38,8 @@
 ;; 3 | YAR    | Yara                 |      1 |               1
 
 
+(defn find-first [f coll]
+  (first (drop-while (complement f) coll)))
 
 (def oid->string
   {18 "AKSO"
@@ -93,6 +96,9 @@
   (let [oid (get-in request [:path-params :oid])]
     (rs oid)))
 
+(defn option-ticker [request]
+  (get-in request [:path-params :ticker]))
+
 (def not-nil? (comp not nil?))
 
 (def om (ObjectMapper.))
@@ -135,6 +141,17 @@
      (assoc context
             :response {:status 500
                        :body (.getMessage ex-info)}))})
+
+(defn url-path-query-for
+  [^String ticker
+   ^String nordnetUnixTime]
+  (str "/market/options?currency=NOK&underlyingSymbol=" ticker "&expireDate=" nordnetUnixTime))
+
+(defn url-for
+  "String -> String -> URL"
+  [^String ticker
+   ^String nordnetUnixTime]
+  (URL. "https" "www.nordnet.no" (url-path-query-for ticker nordnetUnixTime)))
 
 ;; (defn default-json-response
 ;;   [route-name

@@ -12,18 +12,30 @@
 
 (def march-23
   {:exp 1679007600000
-   :call-1 {:t "EQNR3C428.99Z" :r {:ticker "EQNR", :oid 2, :year 2023, :month 3, :ot :call}}
-   :put-1  {:t "EQNR3O428.99Z" :r {:ticker "EQNR", :oid 2, :year 2023, :month 3, :ot :put}}})
+   :call-1
+   (let [o "EQNR3C428.99Z"]
+     {:t o :r {:ticker "EQNR", :option o :oid 2, :year 2023, :month 3, :ot :call}})
+   :put-1
+   (let [o "EQNR3O428.99Z"]
+     {:t o :r {:ticker "EQNR", :option o :oid 2, :year 2023, :month 3, :ot :put}})})
 
 (def june-23
   {:exp 1686866400000
-   :call-1 {:t "NHY3F50.79X" :r {:ticker "NHY", :oid 1, :year 2023, :month 6, :ot :call}}
-   :put-1  {:t "NHY3R140" :r {:ticker "NHY", :oid 1, :year 2023, :month 6, :ot :put}}})
+   :call-1
+   (let [o "NHY3F50.79X"]
+     {:t o :r {:ticker "NHY", :option o :oid 1, :year 2023, :month 6, :ot :call}})
+   :put-1
+   (let [o "NHY3R140"]
+     {:t o :r {:ticker "NHY", :option o :oid 1, :year 2023, :month 6, :ot :put}})})
 
 (def december-23
   {:exp 1702594800000
-   :call-1 {:t "YAR3L380" :r {:ticker "YAR", :oid 3, :year 2023, :month 12, :ot :call}}
-   :put-1  {:t "YAR3X380" :r {:ticker "YAR", :oid 3, :year 2023, :month 12, :ot :put}}})
+   :call-1
+   (let [o "YAR3L380"]
+     {:t o :r {:ticker "YAR", :option o :oid 3, :year 2023, :month 12, :ot :call}})
+   :put-1
+   (let [o "YAR3X380"]
+     {:t o :r {:ticker "YAR", :option o :oid 3, :year 2023, :month 12, :ot :put}})})
 
 (deftest stock-opt-info-ticker
   (let [c1 (:call-1 march-23)
@@ -42,10 +54,13 @@
 (deftest millis-for-ticker-test
   (let [e1 (:exp march-23)
         c1 (get-in march-23 [:call-1 :t])]
-    (is (= e1 (opt/millis-for-ticker c1))))
+    (is (= e1 (opt/millis-for c1))))
+  (let [e1 (:exp june-23)
+        c1 (get-in june-23 [:call-1 :t])]
+    (is (= e1 (opt/millis-for c1))))
   (let [e1 (:exp december-23)
         c1 (get-in december-23 [:call-1 :t])]
-    (is (= e1 (opt/millis-for-ticker c1)))))
+    (is (= e1 (opt/millis-for c1)))))
 
 ;; (comment test-url-for-ticker
 ;;          (let [o "NHY3A72"]

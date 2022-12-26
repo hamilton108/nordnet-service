@@ -1,6 +1,6 @@
 (ns nordnetservice.adapter.redisadapter
   (:require
-   [nordnetservice.common :refer [not-nil?]]
+   [nordnetservice.common :refer [not-nil? url-for]]
    [nordnetservice.stockoption :refer [nordnet-millis]]
    [clojure.core.match :refer [match]])
   (:import
@@ -21,16 +21,16 @@
          :test (.select j 5))
        j))))
 
-(defn url-path-query-for
-  [^String ticker
-   ^String nordnetUnixTime]
-  (str "/market/options?currency=NOK&underlyingSymbol=" ticker "&expireDate=" nordnetUnixTime))
+;; (defn url-path-query-for
+;;   [^String ticker
+;;    ^String nordnetUnixTime]
+;;   (str "/market/options?currency=NOK&underlyingSymbol=" ticker "&expireDate=" nordnetUnixTime))
 
-(defn url-for
-  "String -> String -> URL"
-  [^String ticker
-   ^String nordnetUnixTime]
-  (URL. "https" "www.nordnet.no" (url-path-query-for ticker nordnetUnixTime)))
+;; (defn url-for
+;;   "String -> String -> URL"
+;;   [^String ticker
+;;    ^String nordnetUnixTime]
+;;   (URL. "https" "www.nordnet.no" (url-path-query-for ticker nordnetUnixTime)))
 
 (defn exp-fn
   [^String ticker
@@ -42,7 +42,7 @@
       (let [u (url-for ticker v)]
         (URLInfo. (.toString u) v)))))
 
-(defn url
+(defn url-all
   "ctx -> String -> LocalDate -> [URLInfo]"
   [ctx ^String ticker ^LocalDate dx]
   (let [j (jedis ctx)

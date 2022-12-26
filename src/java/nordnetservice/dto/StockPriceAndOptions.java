@@ -1,6 +1,5 @@
 package nordnetservice.dto;
 
-import nordnetservice.dto.StockPriceDTO;
 import java.util.List;
 
 public class StockPriceAndOptions {

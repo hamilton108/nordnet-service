@@ -1,6 +1,5 @@
 (ns nordnetservice.stockoption
   (:require
-   ;[clojure.core.match :refer [match]]
    [nordnetservice.common :refer [ticker->oid]])
   (:import
    (java.util.regex Pattern)
@@ -10,8 +9,7 @@
    (java.time
     DayOfWeek
     LocalDate
-    ZoneId
-    ZoneOffset)))
+    ZoneId)))
 
 (def EUROPE_OSLO (ZoneId/of "Europe/Oslo"))
 
@@ -75,20 +73,20 @@
       (let [stik (.group m 1)
             year (str->year (.group m 2))
             oinfo (str->option-type (.group m 3))
+            month (:m oinfo)
             oid (ticker->oid stik)]
         {:ticker stik
+         :option ticker
          :oid oid
          :year year
-         :month  (:m oinfo)
+         :month  month
          :ot (:ot oinfo)})
       {})))
 
-(defn millis-for-ticker [ticker]
-  (let [info (stock-opt-info-ticker ticker)
-        friday-3 (third-friday (:year info) (:month info))]
-    (prn info)
-    (prn friday-3)
-    (nordnet-millis friday-3)))
-
-(defn url-for-ticker [ticker]
-  "https://whatever.no")
+(defn millis-for
+  ([ticker]
+   (let [info (stock-opt-info-ticker ticker)]
+     (millis-for (:year info) (:month info))))
+  ([year month]
+   (let [friday-3 (third-friday year month)]
+     (nordnet-millis friday-3))))

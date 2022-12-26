@@ -7,7 +7,7 @@
 (def test-date (LocalDate/of 2022 3 30))
 
 (deftest test-url
-  (let [url (redis/url :test "NHY" test-date)]
+  (let [url (redis/url-all :test "NHY" test-date)]
     ;(doseq [u url] (prn (.getUrl u)))
     (is (= (.length url) 8))))
 

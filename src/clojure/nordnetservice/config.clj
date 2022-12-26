@@ -39,7 +39,6 @@
 
 (defn etrade [env factory]
   (let [calc (BlackScholes.)]
-    (prn env)
     (StockOptionParser3. calc (redis env) (repos env factory) (stock-option-util env))))
 
 (defn factory [env]

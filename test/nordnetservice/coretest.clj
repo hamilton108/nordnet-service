@@ -1,22 +1,41 @@
 (ns nordnetservice.coretest
   (:require
    [clojure.test :refer [deftest is]]
-   [nordnetservice.common :refer [oid->string not-nil?]]
+   [nordnetservice.common :refer [not-nil?]]
    [nordnetservice.config :as config]
-   [nordnetservice.core :as core])
-  (:import (nordnet.html StockOptionParser3)))
+   [nordnetservice.core :as core]))
 
-(def get-page
-  (memoize
-   (fn []
-     (let [ctx (config/get-context :test)
-           dl (:dl ctx)
-           pages (.download dl (oid->string 3))]
-       (.get pages 0)))))
+;; (def get-page
+;;   (memoize
+;;    (fn []
+;;      (let [ctx (config/get-context :test)
+;;            dl (:dl ctx)
+;;            pages (.download dl (oid->string 3))]
+;;        (.get pages 0)))))
 
-(defn find-option [ticker prices]
-  (let [pred (fn [x] (= (-> x .getStockOption .getTicker) ticker))]
-    (first (filter pred prices))))
+
+;; (deftest get-cache-test
+;;   (let [info (option/stock-opt-info-ticker "YAR2F370")]
+;;         hit (core/get-cache info )]
+;;     (is (not-nil? hit))
+;;     (is (not-nil? (:sp hit)))
+;;     (is (not-nil? (:opx hit)))
+;;     (is (= 16 (count (:opx hit))))))
+
+(deftest find-option-test
+  (let [ticker "YAR2F370"
+        hit (core/find-option (config/get-context :test) ticker)]
+    (is (not-nil? hit))
+    (let [op (.getOption hit)
+          sp (.getStock hit)]
+      (is (not-nil? sp))
+      (is (not-nil? op))
+      (is (= ticker (-> op .getTicker)))
+      (is (= "YAR" (-> sp .getStockPrice .getTicker))))))
+
+;; (defn find-option [ticker prices]
+;; (let [pred (fn [x] (= (-> x .getStockOption .getTicker) ticker))]
+;;   (first (filter pred prices))))
 
 
 ;; (deftest normalize-ticker
@@ -66,5 +85,5 @@
 ;;     (is (= (.getX r_550) 550.0))))
 
 
-(deftest test-url-for-ticker
-  (is (= "whatever" (core/url-for "NNN"))))
+;; (deftest test-url-for-ticker
+;; (is (= "whatever" (core/url-for "NNN"))))
