@@ -1,4 +1,4 @@
-(defproject nordnet-service "0.0.1-SNAPSHOT"
+(defproject nordnet-service "1.0.0"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -27,25 +27,26 @@
 
 
                 ;------------------ Jackson ------------------ 
-                 [com.fasterxml.jackson.core/jackson-core "2.10.2"]
-                 [com.fasterxml.jackson.core/jackson-annotations "2.10.2"]
+                 ;[com.fasterxml.jackson.core/jackson-core "2.10.2"]
+                 ;[com.fasterxml.jackson.core/jackson-annotations "2.10.2"]
                  [com.fasterxml.jackson.core/jackson-databind "2.10.2"]
 
                 ;------------------ Web  ------------------ 
                  [net.sourceforge.htmlunit/htmlunit "2.44.0"
                   :exclusions [org.eclipse.jetty/jetty-http org.eclipse.jetty/jetty-io]]
 
+                ;------------------ Local libs ------------------ 
+                 [rcstadheim/critter-repos "3.0.0-20230113.105404-27"]
+                 [rcstadheim/nordnet-repos "3.0.0-20230117.204141-11"]
+                 [rcstadheim/oahu "3.0.0-20220413.092122-1"]
+                 [rcstadheim/vega "3.0.0-20220413.092302-1"]
+
                 ;------------------ Diverse  ------------------ 
                  [colt/colt "1.2.0"]
                  ;[org.clojure/core.cache "1.0.207"]
                  [com.github.ben-manes.caffeine/caffeine "3.1.2"]
 
-                 [clj-http "3.12.3"]
-                ;------------------ Local libs ------------------ 
-                 [rcstadheim/critter-repos "3.0.0-20221015.095752-16"]
-                 [rcstadheim/nordnet-repos "3.0.0-20221207.085301-10"]
-                 [rcstadheim/oahu "3.0.0-20220413.092122-1"]
-                 [rcstadheim/vega "3.0.0-20220413.092302-1"]]
+                 [clj-http "3.12.3"]]
   :min-lein-version "2.0.0"
   :repositories {"project" "file:/home/rcs/opt/java/mavenlocalrepo"}
   :source-paths ["src/clojure"]

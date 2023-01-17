@@ -34,11 +34,11 @@ def latest_build(java_project):
 
 def generate_project_clj():
     oahu = latest_build("oahu")
-    critters = latest_build("critter-repos")
+    critter = latest_build("critter-repos")
     nordnet = latest_build("nordnet-repos")
     vega = latest_build("vega")
     tpl = Template(filename="%s/python/templates/project.clj.tpl" % HOME)
-    result = tpl.render(oahu=oahu, critters=critters,
+    result = tpl.render(oahu=oahu, critter=critter,
                         nordnet=nordnet, vega=vega)
     print(result)
     with(open(PROJECT_CLJ, "w")) as f:

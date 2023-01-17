@@ -1,7 +1,6 @@
 (ns nordnetservice.adapter.downloadadapter
   (:gen-class)
   (:require
-   ;[nordnetservice.common :refer [nordnet-option-url]]
    [nordnetservice.common :as common]
    [nordnetservice.stockoption :as option]
    [nordnetservice.ports :refer [Downloader]]
@@ -51,3 +50,7 @@
           unixtime (option/millis-for y m)
           url (common/url-for stock-ticker unixtime)]
       (url->page url))))
+
+(defn demo []
+  (let [dl (DefaultDownloader.)]
+    (.downloadAll dl "YAR")))

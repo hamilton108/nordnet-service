@@ -4,10 +4,10 @@
    [clojure.core.match :refer [match]])
   (:import
    (java.util Optional)
-   (critter.mybatis
-    CritterMapper
-    StockMapper
-    StockOptionMapper)
+   ;(critter.mybatis
+   ; CritterMapper
+   ; StockMapper
+   ; StockOptionMapper)
    (critter.repos
     StockMarketRepository)))
 

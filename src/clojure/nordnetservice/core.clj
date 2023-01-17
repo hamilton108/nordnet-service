@@ -1,7 +1,6 @@
 (ns nordnetservice.core
   (:gen-class)
   (:require
-   [nordnetservice.config :as config]
    [nordnetservice.stockoption :as option]
    [nordnetservice.common :refer [oid->string ticker->oid find-first]])
    ;[nordnetservice.adapter.critteradapter :as crit])
@@ -40,7 +39,7 @@
         (.info logger "Fetching from cache...")
         result)
       (let [result (fetch-stock-options ctx oid)]
-        (.info logger "Empty  cache...")
+        (.info logger "[stock-options] Empty cache...")
         (.put ca oid result)
         result))
     ;else ----------------------------------
@@ -79,6 +78,7 @@
         cached (if-let [tmp (get-fn)]
                  tmp
                  (do
+                   (.info logger "[get-cache] Empty cache...")
                    (populate-cache info etrade dl)
                    (get-fn)))]
     cached))
@@ -87,7 +87,10 @@
   (let [info (option/stock-opt-info-ticker optionticker)
         hit (get-cache info etrade dl)
         op (find-first #(= optionticker (.getTicker %)) (:opx hit))]
+    (.info logger "[find-option] hit")
     (OptionWithStockPrice. op (:sp hit))))
+
+(defn stockprice [])
 
 ;; (defn find-option_ [{:keys [etrade dl]} optionticker]
 ;;   (let [info (option/stock-opt-info-ticker optionticker)

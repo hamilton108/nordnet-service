@@ -1,19 +1,19 @@
 package nordnetservice.factory;
 
+import java.time.LocalDate;
 import critter.stock.Stock;
 import critter.stock.StockPrice;
 import critter.stockoption.StockOption;
 import critter.stockoption.StockOptionPrice;
 import critter.stockoption.StockOptionPurchase;
-import critter.util.StockOptionUtil;
 import vega.financial.calculator.BlackScholes;
 import vega.financial.calculator.OptionCalculator;
 
 public class StockMarketFactory {
-    private final StockOptionUtil util;
+    private final LocalDate currentDate;
     private final OptionCalculator optionCalculator = new BlackScholes();
-    public StockMarketFactory(StockOptionUtil stockOptionUtil) {
-        util = stockOptionUtil;
+    public StockMarketFactory(LocalDate currentDate) {
+        this.currentDate = currentDate;
     }
     public Stock createStock(int oid) {
         var result = new Stock();
@@ -49,7 +49,7 @@ public class StockMarketFactory {
         result.setCls(cls);
         result.setStock(stock);
         result.setVolume(1000);
-        result.setLocalDx(util.getCurrentDate());
+        result.setLocalDx(currentDate);
 
         return result;
     }
@@ -64,7 +64,7 @@ public class StockMarketFactory {
         so.setLifeCycle(StockOption.LifeCycle.FROM_HTML);
         so.setOpType(optionType);
         so.setX(x);
-        so.setStockOptionUtil(util);
+        so.setCurrentDate(currentDate);
         so.setStock(stockPrice.getStock());
         return so;
     }
@@ -104,7 +104,6 @@ public class StockMarketFactory {
     public StockOptionPurchase createPurchase(StockOptionPrice price) {
         var p = new StockOptionPurchase();
         p.setOptionName(price.getTicker());
-        p.setCalculator(optionCalculator);
         p.setStatus(11);
         p.setBuyAtPurchase(price.getBuy());
         p.setX(price.getX());

@@ -5,10 +5,8 @@
    [clojure.core.match :refer [match]])
   (:import
    (java.time LocalDate)
-   (java.net URL)
    (redis.clients.jedis Jedis)
-   (nordnet.financial OpeningPrices)
-   (nordnet.downloader URLInfo)))
+   (nordnet.financial OpeningPrices)))
 
 
 (def jedis
@@ -39,8 +37,7 @@
   (let [x (Long/parseLong v)]
     (if (< x cur-dx)
       nil
-      (let [u (url-for ticker v)]
-        (URLInfo. (.toString u) v)))))
+      (url-for ticker v))))
 
 (defn url-all
   "ctx -> String -> LocalDate -> [URLInfo]"

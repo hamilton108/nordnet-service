@@ -25,24 +25,33 @@
 (defn redis [env]
   (OpeningPricesImpl. env))
 
-(defn stock-option-util [env]
+;; (defn stock-option-util [env]
+;;   (match env
+;;     :prod
+;;     (StockOptionUtil.)
+;;     :test
+;;     (StockOptionUtil. (LocalDate/of 2022 5 25))
+;;     :demo
+;;     (StockOptionUtil. (LocalDate/of 2022 1 1))))
+
+(defn current-date [env]
   (match env
     :prod
-    (StockOptionUtil.)
+    (LocalDate/now)
     :test
-    (StockOptionUtil. (LocalDate/of 2022 5 25))
+    (LocalDate/of 2022 5 25)
     :demo
-    (StockOptionUtil. (LocalDate/of 2022 1 1))))
+    (LocalDate/of 2022 1 1)))
 
 (defn repos [env factory]
   (stock-market-repos env factory))
 
 (defn etrade [env factory]
   (let [calc (BlackScholes.)]
-    (StockOptionParser3. calc (redis env) (repos env factory) (stock-option-util env))))
+    (StockOptionParser3. calc (redis env) (repos env factory) (current-date env))))
 
 (defn factory [env]
-  (StockMarketFactory. (stock-option-util env)))
+  (StockMarketFactory. (current-date env)))
 
 (defn downloader [env]
   (match env
