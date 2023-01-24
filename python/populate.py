@@ -106,7 +106,7 @@ def populate_opening_prices(r):
     redis_key = "openingprices"
     r.hset(redis_key, "EQNR", "180.00")
     r.hset(redis_key, "NHY", "66.74")
-    r.hset(redis_key, "YAR", "482.00")
+    r.hset(redis_key, "YAR", "452.00")
 
     # 127.0.0.1:6379[5]> hgetall openingprices
     # "EQNR" "180.00"

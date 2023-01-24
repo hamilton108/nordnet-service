@@ -1,35 +1,79 @@
 (ns nordnetservice.core
   (:gen-class)
   (:require
+   [nordnetservice.adapter.nordnetadapter :as nordnet]
+   [nordnetservice.adapter.redisadapter :as redis]
    [nordnetservice.stockoption :as option]
-   [nordnetservice.common :refer [oid->string ticker->oid find-first]])
-   ;[nordnetservice.adapter.critteradapter :as crit])
+   [nordnetservice.config :as config]
+   [nordnetservice.common :refer [oid->string find-first CALL PUT]])
   (:import
+   (vega.financial.calculator BlackScholes)
+   (oahu.exceptions  BinarySearchException)
    (org.slf4j LoggerFactory)
    (java.util.concurrent TimeUnit)
-   (com.github.benmanes.caffeine.cache Caffeine)
-   (nordnetservice.dto
-    StockPriceAndOptions
-    OptionWithStockPrice
-    StockPriceDTO
-    OptionDTO)))
+   (com.github.benmanes.caffeine.cache Caffeine)))
 
 (def logger (LoggerFactory/getLogger "nordnetservice.core"))
-;(def ca (-> (Caffeine/newBuilder) (.expireAfterWrite 15 TimeUnit/SECONDS) .build))
 (def ca (-> (Caffeine/newBuilder) (.expireAfterWrite 5 TimeUnit/MINUTES) .build))
 (def ca-2 (-> (Caffeine/newBuilder) (.expireAfterWrite 5 TimeUnit/SECONDS) .build))
 
-(defn page->options [etrade sp page]
-  (map #(OptionDTO. %) (.options etrade page sp)))
+(def calculator (BlackScholes.))
 
-(defn fetch-stock-options [{:keys [etrade dl]} oid]
+(def days-in-a-year 365.0)
+
+(defmacro calc-iv [spot ot x years price]
+  (let [calc-fn (if (= ot 1) '.ivCall '.ivPut)]
+    `(try
+       ;(prn "Spot: " ~spot ", x: " ~x ", years: " ~years ", price: " ~price)
+       (~calc-fn calculator ~spot ~x ~years ~price)
+       (catch BinarySearchException ex#
+         -1.0))))
+
+(defn calculate
+  [spot {:keys [ot x days] :as option}]
+  (if (nil? option)
+    (do (.warn logger (str "[calculate] option was nil"))
+        nil)
+    (let [years (/ days days-in-a-year)
+          iv-buy (calc-iv spot ot x years (:buy option))
+          iv-sell (calc-iv spot ot x years (:sell option))
+          br-even 0.0]
+      (conj option
+            {:ivBuy iv-buy
+             :ivSell iv-sell
+             :brEven br-even}))))
+
+(defn add-on
+  ([cur-date info option]
+   (if (nil? option)
+     (do (.warn logger (str "[add-on] option was nil"))
+         nil)
+     (let [iso-days (option/iso-8601-and-days (:year info) (:month info) cur-date)]
+       (conj option
+             {:days (:days iso-days)
+              :expiry (:iso iso-days)}))))
+  ([cur-date option]
+   (if (nil? option)
+     (do (.warn logger (str "[add-on] option was nil"))
+         nil)
+     (let [optionticker (:ticker option)
+           info (option/stock-opt-info-ticker optionticker)]
+       (add-on cur-date info option)))))
+
+(defn add-on-stock-price [env stock-ticker stock-price]
+  (let [open-price (redis/opening-price env stock-ticker)]
+    (conj stock-price {:o open-price})))
+
+(defn fetch-stock-options [{:keys [dl cur-date env]} oid]
   (let [ticker (oid->string oid)
         pages (.downloadAll dl ticker)
-        sp (.stockPrice etrade oid (first pages))
-        maps (map (partial page->options etrade sp) pages)
-        fm (flatten maps)
-        sp-dto (StockPriceDTO. sp)]
-    (StockPriceAndOptions. sp-dto fm)))
+        page-1 (nordnet/parse-2 (first pages))
+        page-rest (map nordnet/parse (rest pages))
+        opx (flatten (conj page-rest (:opx page-1)))
+        stock-price (add-on-stock-price env ticker (:stock-price page-1))
+        add-on-opx (map (partial add-on cur-date) opx)
+        add-on-calc (map (partial calculate (:c stock-price)) add-on-opx)]
+    {:stock-price stock-price :opx add-on-calc}))
 
 (defn stock-options [ctx oid has-cache]
   (if (= has-cache true)
@@ -51,60 +95,47 @@
 (defn calls-or-puts
   [ctx
    oid
-   is-call
+   ot
    has-cache]
   (let [raw (stock-options ctx oid has-cache)
-        opts (filter #(= (.isCall %) is-call) (.getOptions raw))]
-    (StockPriceAndOptions. (.getStock raw) opts)))
+        opts (filter #(= (:ot %) ot) (:opx raw))]
+    {:stock-price (:stock-price raw) :opx opts}))
 
 (defn calls [ctx oid has-cache]
-  (calls-or-puts ctx oid true has-cache))
+  (calls-or-puts ctx oid CALL has-cache))
 
 (defn puts [ctx oid has-cache]
-  (calls-or-puts ctx oid false has-cache))
+  (calls-or-puts ctx oid PUT has-cache))
 
-(defn download-and-parse [info etrade dl]
-  (let [page (.downloadForOption dl (:option info))
-        sp (.stockPrice etrade (:oid info) page)
-        opx (page->options etrade sp page)]
-    {:sp (StockPriceDTO. sp) :opx opx}))
+(defn download-and-parse [info dl]
+  (let [page (.downloadForOption dl (:option info))]
+    (nordnet/parse-2 page)))
 
-(defn populate-cache [info etrade dl]
-  (let [cached (download-and-parse info etrade dl)]
+(defn populate-cache [info dl]
+  (let [cached (download-and-parse info dl)]
     (.put ca-2 (:ticker info) cached)))
 
-(defn get-cache [info etrade dl]
+(defn get-cache [info dl]
   (let [get-fn (fn [] (.getIfPresent ca-2 (:ticker info)))
         cached (if-let [tmp (get-fn)]
                  tmp
                  (do
                    (.info logger "[get-cache] Empty cache...")
-                   (populate-cache info etrade dl)
+                   (populate-cache info dl)
                    (get-fn)))]
     cached))
 
-(defn find-option [{:keys [etrade dl]} optionticker]
+(defn find-option [{:keys [dl env cur-date]} optionticker]
   (let [info (option/stock-opt-info-ticker optionticker)
-        hit (get-cache info etrade dl)
-        op (find-first #(= optionticker (.getTicker %)) (:opx hit))]
-    (.info logger "[find-option] hit")
-    (OptionWithStockPrice. op (:sp hit))))
+        hit (get-cache info dl)
+        hit-op (find-first #(= optionticker (:ticker %)) (:opx hit))
+        op (add-on cur-date info  hit-op)
+        stock-price (add-on-stock-price env (:ticker info) (:stock-price hit))
+        calc-op (calculate (:c stock-price) op)]
+    (.info logger (str "[find-option] info: " info ", op: " calc-op))
+    {:stock-price stock-price :option calc-op}))
 
-(defn stockprice [])
-
-;; (defn find-option_ [{:keys [etrade dl]} optionticker]
-;;   (let [info (option/stock-opt-info-ticker optionticker)
-;;         oid (ticker->oid (:ticker info))
-;;         page (.downloadForOption dl optionticker)
-;;         sp (.stockPrice etrade oid page)
-;;         opx (map #(OptionDTO. %) (.options etrade page sp))
-;;         hit (find-me opx)]
-;;     (OptionWithStockPrice. (OptionDTO. hit) (StockPriceDTO sp))))
-
-
-;("YAR2F550" "YAR2F510" "YAR2F470" "YAR2F410" "YAR2F395" "YAR2F390" "YAR2F375" "YAR2F370")
-
-;; (defn demo []
-;;   (let [{:keys [etrade dl]} (config/get-context :test)
-;;         info (option/stock-opt-info-ticker "YAR2F370")]
-;;     (get-cache info etrade dl)))
+(defn demo []
+  (let [ctx (config/get-context :test)]
+    (prn ctx)
+    (calls ctx 3 true)))

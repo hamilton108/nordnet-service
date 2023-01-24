@@ -1,10 +1,15 @@
 (ns nordnetservice.common
   (:gen-class)
-  (:import
-   (java.net URL)
-   (com.fasterxml.jackson.databind ObjectMapper))
   (:require
-   [cheshire.core :as json]))
+   [cheshire.core :as json])
+  (:import
+   (java.time
+    LocalDateTime
+    LocalDate
+    LocalTime
+    ZoneOffset)
+   (java.net URL)
+   (com.fasterxml.jackson.databind ObjectMapper)))
 
 
 ;; 5 | ACY    | Acergy               |      0 |               1
@@ -37,6 +42,13 @@
 ;; 7 | OBX    | Total Return Index   |     -1 |               3
 ;; 3 | YAR    | Yara                 |      1 |               1
 
+(def CALL 1)
+
+(def PUT 2)
+
+(defn close-to?
+  [x y epsilon]
+  (<= (abs (- x y)) epsilon))
 
 (defn find-first [f coll]
   (first (drop-while (complement f) coll)))
@@ -83,6 +95,25 @@
    "TOM" 17
    "YAR" 3})
 
+
+;; public static long unixTime 
+;; (LocalDate ld, LocalTime tm)
+;; {LocalDateTime ldt = LocalDateTime.of (
+;;                                        ld.getYear (), 
+;;                                        ld.getMonth (), 
+;;                                        ld.getDayOfMonth (),
+;;                                        tm.getHour (), tm.getMinute (), 0); 
+;;  return ldt.toInstant (ZoneOffset.UTC) .toEpochMilli ();
+
+(defn unix-time [^LocalDate ld ^LocalTime tm]
+  (let [ldt (LocalDateTime/of
+             (.getYear ld)
+             (.getMonth ld)
+             (.getDayOfMonth ld)
+             (.getHour tm)
+             (.getMinute tm)
+             0)]
+    (-> ldt (.toInstant ZoneOffset/UTC) .toEpochMilli)))
 
 (defn rs [v]
   (if (string? v)
@@ -152,6 +183,13 @@
   [^String ticker
    ^String nordnetUnixTime]
   (URL. "https" "www.nordnet.no" (url-path-query-for ticker nordnetUnixTime)))
+
+(defn iso-8601 [^LocalDate ld]
+  (let [m (.getMonthValue ld)
+        m_str (if (< m 10) (str "0" m) (str m))
+        d (.getDayOfMonth ld)
+        d_str (if (< d 10) (str "0" d) (str d))]
+    (str (.getYear ld) "-" m_str "-" d_str)))
 
 ;; (defn default-json-response
 ;;   [route-name

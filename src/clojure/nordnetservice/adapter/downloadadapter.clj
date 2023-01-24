@@ -15,8 +15,8 @@
     (-> result .getOptions (.setJavaScriptEnabled false))
     result))
 
-(defn url->page [url]
-  (PageInfo. (.getPage web-client url) nil nil))
+(defn url->page [^String url]
+  (PageInfo. (.getPage ^WebClient web-client url) nil nil))
 
     ;; private String urlFileFor(String ticker, String nordnetUnixTime) {
     ;;     return String.format("/market/options?currency=NOK&underlyingSymbol=%s&expireDate=%s", ticker,  nordnetUnixTime);

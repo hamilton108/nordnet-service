@@ -7,13 +7,14 @@
    ;(critter.mybatis
    ; CritterMapper
    ; StockMapper
-   ; StockOptionMapper)
+   ;StockOptionMapper)
+   (nordnetservice.factory StockMarketFactory)
    (critter.repos
     StockMarketRepository)))
 
 ;(def factory (StockMarketFactory.))
 
-(defn demo-test-repos [factory]
+(defn demo-test-repos [^StockMarketFactory factory]
   (reify StockMarketRepository
     (findStock [_ oid]
       (.createStock factory oid))
@@ -24,7 +25,7 @@
     (purchasesWithSalesAll [_ _ _ _]
       [])))
 
-(defn stock-market-repos [env factory]
+(defn stock-market-repos [env ^StockMarketFactory factory]
   (prn env)
   (match env
     :demo

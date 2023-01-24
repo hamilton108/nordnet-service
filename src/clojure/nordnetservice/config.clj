@@ -5,14 +5,10 @@
    [nordnetservice.adapter.redisadapter]
    [nordnetservice.adapter.critteradapter :refer [stock-market-repos]])
   (:import
-   (nordnet.html StockOptionParser3)
-   (vega.financial.calculator BlackScholes)
    (nordnetservice.factory StockMarketFactory)
-   (critter.util StockOptionUtil)
    (nordnetservice.adapter.downloadadapter
     TestDownloader
     DefaultDownloader)
-   (nordnetservice.adapter.redisadapter OpeningPricesImpl)
    (java.time LocalDate)))
 
 ;; (defn redis [ct]
@@ -21,9 +17,6 @@
 ;;     (NordnetRedis. "172.20.1.2" 0)
 ;;     :else
 ;;     (NordnetRedis. "172.20.1.2" 5)))
-
-(defn redis [env]
-  (OpeningPricesImpl. env))
 
 ;; (defn stock-option-util [env]
 ;;   (match env
@@ -39,16 +32,16 @@
     :prod
     (LocalDate/now)
     :test
-    (LocalDate/of 2022 5 25)
+    (LocalDate/of 2022 9 25)
     :demo
     (LocalDate/of 2022 1 1)))
 
 (defn repos [env factory]
   (stock-market-repos env factory))
 
-(defn etrade [env factory]
-  (let [calc (BlackScholes.)]
-    (StockOptionParser3. calc (redis env) (repos env factory) (current-date env))))
+;; (defn etrade [env factory]
+;;   (let [calc (BlackScholes.)]
+;;     (StockOptionParser3. calc (redis env) (repos env factory) (current-date env))))
 
 (defn factory [env]
   (StockMarketFactory. (current-date env)))
@@ -62,8 +55,8 @@
 
 (defn get-context [env]
   (let [f (factory env)]
-    {:etrade (etrade env f)
-     :dl (downloader env)
+    {:dl (downloader env)
      :factory f
      :env env
+     :cur-date (current-date env)
      :purchase-type (if (= :prod env) 4 11)}))

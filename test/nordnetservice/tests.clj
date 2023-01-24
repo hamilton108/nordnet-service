@@ -1,11 +1,14 @@
 (ns nordnetservice.tests
   (:require
    [clojure.test :refer [is deftest]]
+   [nordnetservice.common :as COM :refer [not-nil? close-to? find-first CALL]]
+   [nordnetservice.core :as core]
    [nordnetservice.stockoption :as opt]
    [nordnetservice.adapter.redisadapter :as redis]
+   [nordnetservice.adapter.nordnetadapter :as nordnet]
    [nordnetservice.config :as config])
   (:import
-   (java.time LocalDate)))
+   (java.time LocalDate LocalTime)))
 
 (defn implements [clazz interface]
   (let  [i (-> clazz .getClass .getInterfaces)
@@ -26,13 +29,14 @@
 (deftest test-redis-expiry
   (let [test-date (LocalDate/of 2022 6 16)
         url (redis/url-all :test "NHY" test-date)]
-    ;(doseq [u url] (prn (.getUrl u)))
     (is (= (.length url) 8))))
 
 (deftest test-test-url
   (let [tu (redis/test-url :test)]
-    (is (= "file:////home/rcs/opt/java/nordnet-repos/src/integrationTest/resources/html/derivatives/YAR-3.html" tu))))
+    ;(is (= "file:////home/rcs/opt/java/nordnet-repos/src/integrationTest/resources/html/derivatives/YAR-3.html" tu))))
+    (is (= "file:////home/rcs/opt/java/nordnet-service/test/resources/html/yar.html" tu))))
 
+;;----------------------------- stockoption  -----------------------------
 
 (deftest test-nordnet-millis
   (let [test-date (LocalDate/of 2023 3 30)]
@@ -90,61 +94,86 @@
         c1 (get-in december-23 [:call-1 :t])]
     (is (= e1 (opt/millis-for c1)))))
 
+(deftest test-iso-8601-and-days
+  (let [ctx (config/get-context :test)
+        result (opt/iso-8601-and-days 2022 11 (:cur-date ctx))]
+    (is (= (:days result) 54))
+    (is (= (:iso result) "2022-11-18"))))
 
-;; (def get-page
-;;   (memoize
-;;    (fn []
-;;      (let [ctx (config/get-context :test)
-;;            dl (:dl ctx)
-;;            pages (.download dl (oid->string 3))]
-;;        (.get pages 0)))))
+;;----------------------------- common -----------------------------
 
+(deftest test-unix-time
+  (let [ld (LocalDate/of 2023 1 19)
+        tm (LocalTime/of 17 33 0)]
+    (is (= 1674149580000 (COM/unix-time ld tm)))))
 
-;; (deftest get-cache-test
-;;   (let [info (option/stock-opt-info-ticker "YAR2F370")]
-;;         hit (core/get-cache info )]
-;;     (is (not-nil? hit))
-;;     (is (not-nil? (:sp hit)))
-;;     (is (not-nil? (:opx hit)))
-;;     (is (= 16 (count (:opx hit))))))
+(deftest test-iso-8601
+  (is (= "2023-05-07" (COM/iso-8601 (LocalDate/of 2023 5 7))))
+  (is (= "2023-11-27" (COM/iso-8601 (LocalDate/of 2023 11 27)))))
 
-      ;;    (let [ticker "YAR2F370"
-      ;;          hit (core/find-option (config/get-context :test) ticker)]
-      ;;      (is (not-nil? hit))
-      ;;      (let [op (.getOption hit)
-      ;;            sp (.getStock hit)]
-      ;;        (is (not-nil? sp))
-      ;;        (is (not-nil? op))
-      ;;        (is (= ticker (-> op .getTicker)))
-      ;;        (is (= "YAR" (-> sp .getStockPrice .getTicker))))))
+;;----------------------------- nordnetadapter -----------------------------
 
-
-;; (defn find-option [ticker prices]
-;; (let [pred (fn [x] (= (-> x .getStockOption .getTicker) ticker))]
-;;   (first (filter pred prices))))
+(deftest test-match-ticker
+  (let [ticker "YAR3A371.57X"
+        s1 (str "Norwayx " ticker)
+        s2 (str "Norway   " ticker)
+        m1 (nordnet/match-ticker s1)
+        m2 (nordnet/match-ticker s2)]
+    (is (= m1 nil))
+    (is (= m2 ticker))))
 
 
-;; (deftest normalize-ticker
-;;   (let [ctx (config/get-context :test)
-;;         parser (:etrade ctx)
-;;         invalid (.elementToTicker parser "Norway YAR2F534.58X")
-;;         valid (.elementToTicker parser "Norway YAR2F470")]
-;;     (is (nil? invalid))
-;;     (is (not-nil? valid))
-;;     (is (= valid "YAR2F470"))))
+;;----------------------------- core -----------------------------
+;; (def expected-option
+;;   {:brEven 0.0
+;;    :expiry "2023-01-20"
+;;    :ticker "YAR3A528.02X"
+;;    :days 117
+;;    :ivSell 0.0
+;;    :sell 0.6
+;;    :buy 0.0
+;;    :ivBuy 0.0
+;;    :ot :call
+;;    :x 528.02})
+
+(deftest test-find-ticker
+  (let [ctx (config/get-context :test)
+        result (core/find-option ctx "YAR3A528.02X")
+        op (:option result)
+        sp (:stock-price result)]
+    (is (not-nil? result))
+    (is (not-nil? op))
+    (is (not-nil? sp))
+    (is (= "YAR3A528.02X" (:ticker op)))
+    (is (close-to? 117 (:days op) 0.1))
+    (is (close-to? 0.6 (:sell op) 0.001))
+    (is (close-to? 0.0 (:buy op) 0.001))
+    (is (close-to? 528.02 (:x op) 0.001))
+
+    (is (close-to? 452.0 (:o sp) 0.001))
+    (is (close-to? 458.9 (:h sp) 0.001))
+    (is (close-to? 450.6 (:l sp) 0.001))
+    (is (close-to? 452.6 (:c sp) 0.001))
+
+    (is (= CALL (:ot op)))
+    (is (= "2023-01-20" (:expiry op)))))
+
+(deftest test-options
+  (let [ctx (config/get-context :test)
+        calls (core/calls ctx 3 true)
+        puts (core/puts ctx 3 true)]
+    (is (= 21 (count (:opx calls))))
+    (is (= 21 (count (:opx puts))))
+    (let [call (find-first #(= "YAR3A400.90X" (:ticker %)) (:opx calls))]
+      (is (not-nil? call))
+      (is (close-to? 0.796875 (:ivBuy call) 0.01))
+      (is (close-to? 0.83125  (:ivSell call) 0.01)))))
 
 ;; (deftest test-core-stock-options
 ;;   (let [ctx (config/get-context :test)
 ;;         opts (core/stock-options ctx 3 true)]
 ;;     (is (= (count opts) 16))))
 
-;; (defn demo []
-;;   (let [page (get-page)
-;;         ctx (config/get-context :test)
-;;         parser (:etrade ctx)
-;;         sp (.stockPrice parser 3 page)
-;;         opts (.options parser page sp)]
-;;     opts))
 
 ;; (deftest test-stock-options
 ;;   (let [page (get-page)
@@ -169,7 +198,3 @@
 ;;     (is (= (.getBuy r_550) 61.75))
 ;;     (is (= (.getSell r_550) 64.75))
 ;;     (is (= (.getX r_550) 550.0))))
-
-
-;; (deftest test-url-for-ticker
-;; (is (= "whatever" (core/url-for "NNN"))))

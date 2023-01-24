@@ -41,20 +41,25 @@
 
 (defn url-all
   "ctx -> String -> LocalDate -> [URLInfo]"
-  [ctx ^String ticker ^LocalDate dx]
-  (let [j (jedis ctx)
+  [env ^String ticker ^LocalDate dx]
+  (let [^Jedis j (jedis env)
         exp (.smembers j "expiry")
         millis (nordnet-millis dx)]
     (filterv not-nil? (map (partial exp-fn ticker millis) exp))))
 
 (defn test-url [env]
-  (let [j (jedis env)
-        test-url (if (= env :test) "test-url" "demo-url")]
-    (.get j test-url)))
+  (let [^Jedis j (jedis env)
+        url (if (= env :test) "test-url" "demo-url")]
+    (.get j url)))
+
+;(defrecord OpeningPricesImpl [ctx]
+;  OpeningPrices
+
+(defn opening-price [env ^String ticker]
+  (let [^Jedis j (jedis env)
+        op (.hget ^Jedis j "openingprices" ticker)]
+    (Double/parseDouble op)))
 
 (defrecord OpeningPricesImpl [ctx]
   OpeningPrices
-  (fetchPrice [_ ticker]
-    (let [j (jedis ctx)
-          op (.hget j "openingprices" ticker)]
-      (Double/parseDouble op))))
+  (fetchPrice [_ ticker]))
