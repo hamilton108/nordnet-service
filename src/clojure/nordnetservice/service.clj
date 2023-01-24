@@ -46,6 +46,14 @@
   (default-json-response ::find-option 200 true
                          (fn [req]
                            (core/find-option ctx (option-ticker req)))))
+(def demo
+  (default-json-response ::demo 200 false
+                         (fn [_]
+                           {:a
+                            [{:b {:c 23} :b2 {:c2 34 :c22 {:d 334}}}
+                             {:b {:c 24} :b2 {:c2 35 :c22 {:d 335}}}
+                             {:b {:c 25} :b2 {:c2 36 :c22 {:d 336}}}
+                             {:b {:c 26} :b2 {:c2 37 :c22 {:d 337}}}]})))
 
 ;; (def nocache-find-option
 ;;   (default-json-response ::nocache-find-option 200 true
@@ -60,6 +68,7 @@
      ["/nocache/puts/:oid" :get nocache-puts]
      ["/calls/:oid" :get calls]
      ["/puts/:oid" :get puts]
+     ["/demo" :get demo]
      ["/option/:ticker" :get find-option]}))
 
 ;; Map-based routes

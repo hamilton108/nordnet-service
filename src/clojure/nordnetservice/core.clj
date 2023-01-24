@@ -1,6 +1,9 @@
 (ns nordnetservice.core
   (:gen-class)
   (:require
+   [nordnetservice.config :as config]
+   [nordnetservice.adapter.nordnetadapter :as nordnet]
+   [nordnetservice.adapter.redisadapter :as redis]
    [nordnetservice.stockoption :as option]
    [nordnetservice.common :refer [oid->string ticker->oid find-first]])
    ;[nordnetservice.adapter.critteradapter :as crit])
@@ -63,34 +66,40 @@
 (defn puts [ctx oid has-cache]
   (calls-or-puts ctx oid false has-cache))
 
-(defn download-and-parse [info etrade dl]
-  (let [page (.downloadForOption dl (:option info))
-        sp (.stockPrice etrade (:oid info) page)
-        opx (page->options etrade sp page)]
-    {:sp (StockPriceDTO. sp) :opx opx}))
+(defn download-and-parse [info dl]
+  (let [page (.downloadForOption dl (:option info))]
+    (nordnet/parse page)))
 
-(defn populate-cache [info etrade dl]
-  (let [cached (download-and-parse info etrade dl)]
+(defn populate-cache [info dl]
+  (let [cached (download-and-parse info dl)]
     (.put ca-2 (:ticker info) cached)))
 
-(defn get-cache [info etrade dl]
+(defn get-cache [info dl]
   (let [get-fn (fn [] (.getIfPresent ca-2 (:ticker info)))
         cached (if-let [tmp (get-fn)]
                  tmp
                  (do
                    (.info logger "[get-cache] Empty cache...")
-                   (populate-cache info etrade dl)
+                   (populate-cache info dl)
                    (get-fn)))]
     cached))
 
-(defn find-option [{:keys [etrade dl]} optionticker]
+(defn find-option [{:keys [dl env]} optionticker]
   (let [info (option/stock-opt-info-ticker optionticker)
-        hit (get-cache info etrade dl)
-        op (find-first #(= optionticker (.getTicker %)) (:opx hit))]
+        hit (get-cache info dl)
+        search-flag (if (= :call (:ot info)) :calls :puts)
+        search-items (get-in hit [:opx search-flag])
+        op (find-first #(= optionticker (:ticker %)) search-items)
+        open-price (redis/opening-price env (:ticker info))
+        stock-price (conj (:stock-price hit) {:o open-price})]
     (.info logger "[find-option] hit")
-    (OptionWithStockPrice. op (:sp hit))))
+    {:stock-price stock-price :option op}))
 
-(defn stockprice [])
+(defn demo []
+  (let [ctx (config/get-context :demo)]
+    (find-option ctx "YAR3A528.02X")))
+
+
 
 ;; (defn find-option_ [{:keys [etrade dl]} optionticker]
 ;;   (let [info (option/stock-opt-info-ticker optionticker)

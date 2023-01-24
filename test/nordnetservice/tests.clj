@@ -1,11 +1,13 @@
 (ns nordnetservice.tests
   (:require
    [clojure.test :refer [is deftest]]
+   [nordnetservice.common :as COM]
    [nordnetservice.stockoption :as opt]
    [nordnetservice.adapter.redisadapter :as redis]
+   [nordnetservice.adapter.nordnetadapter :as nordnet]
    [nordnetservice.config :as config])
   (:import
-   (java.time LocalDate)))
+   (java.time LocalDate LocalTime)))
 
 (defn implements [clazz interface]
   (let  [i (-> clazz .getClass .getInterfaces)
@@ -89,6 +91,24 @@
   (let [e1 (:exp december-23)
         c1 (get-in december-23 [:call-1 :t])]
     (is (= e1 (opt/millis-for c1)))))
+
+;;----------------------------- common -----------------------------
+
+(deftest test-unix-time
+  (let [ld (LocalDate/of 2023 1 19)
+        tm (LocalTime/of 17 33 0)]
+    (is (= 1674149580000 (COM/unix-time ld tm)))))
+
+;;----------------------------- nordnetadapter -----------------------------
+
+(deftest test-match-ticker
+  (let [ticker "YAR3A371.57X"
+        s1 (str "Norwayx " ticker)
+        s2 (str "Norway   " ticker)
+        m1 (nordnet/match-ticker s1)
+        m2 (nordnet/match-ticker s2)]
+    (is (= m1 nil))
+    (is (= m2 ticker))))
 
 
 ;; (def get-page

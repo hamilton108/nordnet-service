@@ -2,7 +2,7 @@
   (:require
    [nordnetservice.common :refer [ticker->oid]])
   (:import
-   (java.util.regex Pattern)
+   (java.util.regex Pattern Matcher)
    (java.time.temporal TemporalAdjusters)
    (java.time.chrono ChronoLocalDateTime)
    ;(vega.financial StockOption$OptionType)
@@ -26,7 +26,7 @@
 (defn third-friday
   "Int -> Int -> LocalDate"
   [year month]
-  (-> (LocalDate/of year month 1)
+  (-> (LocalDate/of ^long year ^long month 1)
       (.with
        (TemporalAdjusters/dayOfWeekInMonth 3 DayOfWeek/FRIDAY))))
 
@@ -68,7 +68,7 @@
 
 
 (defn stock-opt-info-ticker [ticker]
-  (let [m (.matcher pattern ticker)]
+  (let [^Matcher m (.matcher ^Pattern pattern ticker)]
     (if (.find m)
       (let [stik (.group m 1)
             year (str->year (.group m 2))

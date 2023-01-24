@@ -1,10 +1,15 @@
 (ns nordnetservice.common
   (:gen-class)
-  (:import
-   (java.net URL)
-   (com.fasterxml.jackson.databind ObjectMapper))
   (:require
-   [cheshire.core :as json]))
+   [cheshire.core :as json])
+  (:import
+   (java.time
+    LocalDateTime
+    LocalDate
+    LocalTime
+    ZoneOffset)
+   (java.net URL)
+   (com.fasterxml.jackson.databind ObjectMapper)))
 
 
 ;; 5 | ACY    | Acergy               |      0 |               1
@@ -83,6 +88,28 @@
    "TOM" 17
    "YAR" 3})
 
+
+;; public static long unixTime 
+;; (LocalDate ld, LocalTime tm)
+;; {LocalDateTime ldt = LocalDateTime.of (
+;;                                        ld.getYear (), 
+;;                                        ld.getMonth (), 
+;;                                        ld.getDayOfMonth (),
+;;                                        tm.getHour (), tm.getMinute (), 0); 
+;;  return ldt.toInstant (ZoneOffset.UTC) .toEpochMilli ();
+
+(defn unix-time [^LocalDate ld ^LocalTime tm]
+  (let [ldt (LocalDateTime/of
+             (.getYear ld)
+             (.getMonth ld)
+             (.getDayOfMonth ld)
+             (.getHour tm)
+             (.getMinute tm)
+             0)
+        ;instant (.toInstant ldt ZoneOffset/UTC)
+        ]
+    ;(.toEpochMilli instant)))
+    (-> ldt (.toInstant ZoneOffset/UTC) .toEpochMilli)))
 
 (defn rs [v]
   (if (string? v)

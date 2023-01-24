@@ -8,7 +8,6 @@
    (nordnet.html StockOptionParser3)
    (vega.financial.calculator BlackScholes)
    (nordnetservice.factory StockMarketFactory)
-   (critter.util StockOptionUtil)
    (nordnetservice.adapter.downloadadapter
     TestDownloader
     DefaultDownloader)
