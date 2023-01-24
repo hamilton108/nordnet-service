@@ -46,16 +46,10 @@
 
 (defn parse-stockprice [^Element el]
   (let [stockprice-row ^Element (nth (.children el) 1)
-        rc (.children stockprice-row)
-        hi (element->value rc SP_HI :double)
-        lo (element->value rc SP_LO :double)
-        cls (element->value rc SP_CLS :double)
-        ;opn (redis/opening-price "" "")
-        ]
-    {:h hi, :l lo, :c cls}))
-
-    ;;     cls (nth rc SP_CLS)]
-    ;; (element-text cls)))
+        rc (.children stockprice-row)]
+    {:h (element->value rc SP_HI :double)
+     :l (element->value rc SP_LO :double)
+     :c (element->value rc SP_CLS :double)}))
 
 (defn parse-option [option-type ^Element el]
   (let [row (.children el)
@@ -74,11 +68,14 @@
     {:puts (map (partial parse-option :put) value-rows)
      :calls (map (partial parse-option :call) value-rows)}))
 
-(defn parse [page]
+(defn parse [stockprice? page]
   (let [s (content page)
         d (Jsoup/parse s)
-        [top opx] (.select d "[role=table]")]
-    {:stock-price (parse-stockprice top) :opx (parse-options opx)}))
+        [top opx] (.select d "[role=table]")
+        sp (if (= stockprice? true)
+             (parse-stockprice top)
+             nil)]
+    {:stock-price sp :opx (parse-options opx)}))
 
     ;(prn (str (class top) ", " (class opx)))
     ;{:stock-price (parse-stockprice top) :options (parse-options opx)}))

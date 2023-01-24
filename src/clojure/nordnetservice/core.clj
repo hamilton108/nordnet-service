@@ -13,26 +13,38 @@
    (com.github.benmanes.caffeine.cache Caffeine)
    (nordnetservice.dto
     StockPriceAndOptions
-    OptionWithStockPrice
     StockPriceDTO
     OptionDTO)))
 
 (def logger (LoggerFactory/getLogger "nordnetservice.core"))
-;(def ca (-> (Caffeine/newBuilder) (.expireAfterWrite 15 TimeUnit/SECONDS) .build))
 (def ca (-> (Caffeine/newBuilder) (.expireAfterWrite 5 TimeUnit/MINUTES) .build))
 (def ca-2 (-> (Caffeine/newBuilder) (.expireAfterWrite 5 TimeUnit/SECONDS) .build))
 
-(defn page->options [etrade sp page]
-  (map #(OptionDTO. %) (.options etrade page sp)))
+;;(defn page->options [etrade sp page]
+;;  (map #(OptionDTO. %) (.options etrade page sp)))
 
-(defn fetch-stock-options [{:keys [etrade dl]} oid]
+;; (defn fetch-stock-options [{:keys [etrade dl]} oid]
+;;   (let [ticker (oid->string oid)
+;;         pages (.downloadAll dl ticker)
+;;         sp (.stockPrice etrade oid (first pages))
+;;         maps (map (partial page->options etrade sp) pages)
+;;         fm (flatten maps)
+;;         sp-dto (StockPriceDTO. sp)]
+;;     (StockPriceAndOptions. sp-dto fm)))
+
+(defn fetch-stock-options [{:keys [dl]} oid]
   (let [ticker (oid->string oid)
         pages (.downloadAll dl ticker)
-        sp (.stockPrice etrade oid (first pages))
-        maps (map (partial page->options etrade sp) pages)
+        page-1 (first pages)
+        page-1-result (nordnet/parse true page-1)
+        maps (map (partial nordnet/parse true) (rest pages))
+        ;sp (nordnet/)
+        ;sp (.stockPrice etrade oid (first pages))
+        ;maps (map (partial page->options etrade sp) pages)
         fm (flatten maps)
-        sp-dto (StockPriceDTO. sp)]
-    (StockPriceAndOptions. sp-dto fm)))
+        ;sp-dto (StockPriceDTO. sp)
+        ]
+    nil))
 
 (defn stock-options [ctx oid has-cache]
   (if (= has-cache true)
@@ -68,7 +80,7 @@
 
 (defn download-and-parse [info dl]
   (let [page (.downloadForOption dl (:option info))]
-    (nordnet/parse page)))
+    (nordnet/parse true page)))
 
 (defn populate-cache [info dl]
   (let [cached (download-and-parse info dl)]
