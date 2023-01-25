@@ -60,22 +60,33 @@
         x (element->value row X :double)
         buy (element->value row i-buy :double)
         sell (element->value row i-sell :double)]
-    {:ticker ticker, :x x, :buy buy, :sell sell}))
+    {:ticker ticker, :x x
+     :buy buy
+     :sell sell
+     :ot option-type
+     :ivBuy 0.0
+     :ivSell 0.0
+     :brEven 0.0
+     :expiry "2023-12-21"}))
 
 (defn parse-options [^Element el]
   (let [rows (.children el)
-        value-rows (drop 1 rows)]
-    {:puts (map (partial parse-option :put) value-rows)
-     :calls (map (partial parse-option :call) value-rows)}))
+        value-rows (drop 1 rows)
+        puts (map (partial parse-option :put) value-rows)
+        calls (map (partial parse-option :call) value-rows)]
+    (concat puts calls)))
 
-(defn parse [stockprice? page]
+(defn parse [page]
   (let [s (content page)
         d (Jsoup/parse s)
-        [top opx] (.select d "[role=table]")
-        sp (if (= stockprice? true)
-             (parse-stockprice top)
-             nil)]
-    {:stock-price sp :opx (parse-options opx)}))
+        [_ opx] (.select d "[role=table]")]
+    (parse-options opx)))
+
+(defn parse-2 [page]
+  (let [s (content page)
+        d (Jsoup/parse s)
+        [top opx] (.select d "[role=table]")]
+    {:stock-price (parse-stockprice top) :opx (parse-options opx)}))
 
     ;(prn (str (class top) ", " (class opx)))
     ;{:stock-price (parse-stockprice top) :options (parse-options opx)}))

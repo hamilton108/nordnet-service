@@ -90,3 +90,11 @@
   ([year month]
    (let [friday-3 (third-friday year month)]
      (nordnet-millis friday-3))))
+
+;; (defn iso-8601-for
+;;   ([ticker]
+;;    (let [info (stock-opt-info-ticker ticker)]
+;;      (iso-8601-for (:year info) (:month info))))
+;;   ([year month]
+;;    (let [friday-3 (third-friday year month)]
+;;      (nordnet-millis friday-3))))

@@ -35,9 +35,8 @@
 (defn fetch-stock-options [{:keys [dl]} oid]
   (let [ticker (oid->string oid)
         pages (.downloadAll dl ticker)
-        page-1 (first pages)
-        page-1-result (nordnet/parse true page-1)
-        maps (map (partial nordnet/parse true) (rest pages))
+        page-1-result (nordnet/parse (first pages))
+        maps (map nordnet/parse-2 (rest pages))
         ;sp (nordnet/)
         ;sp (.stockPrice etrade oid (first pages))
         ;maps (map (partial page->options etrade sp) pages)
@@ -80,7 +79,7 @@
 
 (defn download-and-parse [info dl]
   (let [page (.downloadForOption dl (:option info))]
-    (nordnet/parse true page)))
+    (nordnet/parse-2 page)))
 
 (defn populate-cache [info dl]
   (let [cached (download-and-parse info dl)]
@@ -99,9 +98,9 @@
 (defn find-option [{:keys [dl env]} optionticker]
   (let [info (option/stock-opt-info-ticker optionticker)
         hit (get-cache info dl)
-        search-flag (if (= :call (:ot info)) :calls :puts)
-        search-items (get-in hit [:opx search-flag])
-        op (find-first #(= optionticker (:ticker %)) search-items)
+        ;search-flag (if (= :call (:ot info)) :calls :puts)
+        ;search-items (get-in hit [:opx search-flag])
+        op (find-first #(= optionticker (:ticker %)) (:opx hit))
         open-price (redis/opening-price env (:ticker info))
         stock-price (conj (:stock-price hit) {:o open-price})]
     (.info logger "[find-option] hit")
