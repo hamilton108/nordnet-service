@@ -1,10 +1,11 @@
 (ns nordnetservice.stockoption
   (:require
-   [nordnetservice.common :refer [ticker->oid]])
+   [nordnetservice.common :refer [iso-8601 ticker->oid]])
   (:import
    (java.util.regex Pattern Matcher)
    (java.time.temporal TemporalAdjusters)
    (java.time.chrono ChronoLocalDateTime)
+   (java.time.temporal ChronoUnit)
    ;(vega.financial StockOption$OptionType)
    (java.time
     DayOfWeek
@@ -91,10 +92,11 @@
    (let [friday-3 (third-friday year month)]
      (nordnet-millis friday-3))))
 
-;; (defn iso-8601-for
-;;   ([ticker]
-;;    (let [info (stock-opt-info-ticker ticker)]
-;;      (iso-8601-for (:year info) (:month info))))
-;;   ([year month]
-;;    (let [friday-3 (third-friday year month)]
-;;      (nordnet-millis friday-3))))
+(defn iso-8601-and-days
+  ([ticker cur-date]
+   (let [info (stock-opt-info-ticker ticker)]
+     (iso-8601-and-days (:year info) (:month info) cur-date)))
+  ([year month cur-date]
+   (let [f3 (third-friday year month)]
+     {:iso (iso-8601 f3)
+      :days (.between ChronoUnit/DAYS cur-date f3)})))

@@ -42,6 +42,9 @@
 ;; 7 | OBX    | Total Return Index   |     -1 |               3
 ;; 3 | YAR    | Yara                 |      1 |               1
 
+(defn close-to
+  [x y epsilon]
+  (<= (abs (- x y)) epsilon))
 
 (defn find-first [f coll]
   (first (drop-while (complement f) coll)))
@@ -105,10 +108,7 @@
              (.getDayOfMonth ld)
              (.getHour tm)
              (.getMinute tm)
-             0)
-        ;instant (.toInstant ldt ZoneOffset/UTC)
-        ]
-    ;(.toEpochMilli instant)))
+             0)]
     (-> ldt (.toInstant ZoneOffset/UTC) .toEpochMilli)))
 
 (defn rs [v]
@@ -179,6 +179,13 @@
   [^String ticker
    ^String nordnetUnixTime]
   (URL. "https" "www.nordnet.no" (url-path-query-for ticker nordnetUnixTime)))
+
+(defn iso-8601 [^LocalDate ld]
+  (let [m (.getMonthValue ld)
+        m_str (if (< m 10) (str "0" m) (str m))
+        d (.getDayOfMonth ld)
+        d_str (if (< d 10) (str "0" d) (str d))]
+    (str (.getYear ld) "-" m_str "-" d_str)))
 
 ;; (defn default-json-response
 ;;   [route-name

@@ -38,7 +38,7 @@
     :prod
     (LocalDate/now)
     :test
-    (LocalDate/of 2022 5 25)
+    (LocalDate/of 2022 9 25)
     :demo
     (LocalDate/of 2022 1 1)))
 
@@ -61,8 +61,8 @@
 
 (defn get-context [env]
   (let [f (factory env)]
-    {:etrade (etrade env f)
-     :dl (downloader env)
+    {:dl (downloader env)
      :factory f
      :env env
+     :cur-date (current-date env)
      :purchase-type (if (= :prod env) 4 11)}))

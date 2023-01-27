@@ -63,11 +63,7 @@
     {:ticker ticker, :x x
      :buy buy
      :sell sell
-     :ot option-type
-     :ivBuy 0.0
-     :ivSell 0.0
-     :brEven 0.0
-     :expiry "2023-12-21"}))
+     :ot option-type}))
 
 (defn parse-options [^Element el]
   (let [rows (.children el)
