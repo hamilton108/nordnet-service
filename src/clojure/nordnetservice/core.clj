@@ -21,23 +21,36 @@
 
 (def days-in-a-year 365.0)
 
-(defmacro calc-iv [spot ot x years price]
-  (let [calc-fn (if (= ot 1) '.ivCall '.ivPut)]
-    `(try
-       ;(prn "Spot: " ~spot ", x: " ~x ", years: " ~years ", price: " ~price)
-       (~calc-fn calculator ~spot ~x ~years ~price)
-       (catch BinarySearchException ex#
-         -1.0))))
+;; (defmacro calc-iv [spot ot x days price]
+;;   (let [calc-fn (if (= ot 1) '.ivPut '.ivCall)]
+;;     (prn "days: " days)
+;;     `(try
+;;        (let [years# (/ ~days days-in-a-year)
+;;              iv# (~calc-fn calculator ~spot ~x years# ~price)]
+;;          (prn (str "Spot: " ~spot ", ot: " ~ot "x: " ~x "days: " ~days ", years: " years# ", price: " ~price ", iv: " iv#))
+;;          iv#)
+;;        (catch BinarySearchException ex#
+;;          -1.0))))
+
+(defn calc-iv [spot ot x days price]
+  (try
+    (let [years (/ days days-in-a-year)
+          iv (if (= ot 1)
+               (.ivCall calculator spot x years price)
+               (.ivPut calculator spot x years price))]
+      iv)
+    (catch BinarySearchException _
+      -1.0)))
 
 (defn calculate
   [spot {:keys [ot x days] :as option}]
   (if (nil? option)
     (do (.warn logger (str "[calculate] option was nil"))
         nil)
-    (let [years (/ days days-in-a-year)
-          iv-buy (calc-iv spot ot x years (:buy option))
-          iv-sell (calc-iv spot ot x years (:sell option))
+    (let [iv-buy (calc-iv spot ot x days (:buy option))
+          iv-sell (calc-iv spot ot x days (:sell option))
           br-even 0.0]
+      ;(prn (str "Ticker: " (:ticker option) ", iv-buy: " iv-buy ", iv-sell: " iv-sell ", spot: " spot ", ot: " ot ", x: " x " , days: " days ", buy: " (:buy option) ", sell: " (:sell option)))
       (conj option
             {:ivBuy iv-buy
              :ivSell iv-sell

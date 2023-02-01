@@ -161,13 +161,36 @@
 (deftest test-options
   (let [ctx (config/get-context :test)
         calls (core/calls ctx 3 true)
-        puts (core/puts ctx 3 true)]
+        puts (core/puts ctx 3 true)
+        find-call (fn [tik] (find-first #(= tik (:ticker %)) (:opx calls)))
+        find-put (fn [tik] (find-first #(= tik (:ticker %)) (:opx puts)))]
     (is (= 21 (count (:opx calls))))
     (is (= 21 (count (:opx puts))))
-    (let [call (find-first #(= "YAR3A400.90X" (:ticker %)) (:opx calls))]
-      (is (not-nil? call))
-      (is (close-to? 0.796875 (:ivBuy call) 0.01))
-      (is (close-to? 0.83125  (:ivSell call) 0.01)))))
+    (let [p1 (find-put "YAR3M528.02X")
+          p2 (find-put "YAR3M459.57X")
+          p3 (find-put "YAR3M440.01X")
+          c1 (find-call "YAR3A528.02X")
+          c2 (find-call "YAR3A459.57X")]
+      (is (not-nil? p1))
+      (is (not-nil? p2))
+      (is (not-nil? p3))
+      (is (not-nil? c1))
+      (is (not-nil? c2))
+      (is (close-to? 0.3046875 (:ivSell p1) 0.01))
+      (is (close-to? 0.0758 (:ivBuy p2) 0.01)) c1
+      (is (close-to? 0.0875 (:ivSell p2) 0.01))
+      (is (close-to? 0.0375 (:ivBuy p3) 0.01))
+      (is (close-to? 0.0594 (:ivSell p3) 0.01))
+      (is (close-to? 0.1375 (:ivSell c1) 0.01))
+      (is (close-to? 0.0148 (:ivBuy c2) 0.01))
+      (is (close-to? 0.0094 (:ivSell c2) 0.01)))))
+
+    ;; (let [call (find-first #(= "YAR3A400.90X" (:ticker %)) (:opx calls))]
+    ;;   (is (not-nil? call))
+    ;;   (prn call)
+    ;;   (prn (:stock-price calls))
+    ;;   (is (close-to? -1.0 (:ivBuy call) 0.01))
+    ;;   (is (close-to? -1.0 (:ivSell call) 0.01)))))
 
 ;; (deftest test-core-stock-options
 ;;   (let [ctx (config/get-context :test)
