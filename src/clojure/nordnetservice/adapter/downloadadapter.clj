@@ -7,6 +7,7 @@
    [nordnetservice.adapter.redisadapter :as redis])
   (:import
    (java.time LocalDate)
+   (java.net URL)
    (com.gargoylesoftware.htmlunit WebClient)
    (nordnet.downloader PageInfo)))
 
@@ -15,7 +16,7 @@
     (-> result .getOptions (.setJavaScriptEnabled false))
     result))
 
-(defn url->page [^String url]
+(defn url->page [^URL url]
   (PageInfo. (.getPage ^WebClient web-client url) nil nil))
 
     ;; private String urlFileFor(String ticker, String nordnetUnixTime) {
@@ -32,10 +33,10 @@
   Downloader
   (downloadAll [_ _]
     (let [url (redis/test-url env)]
-      [(url->page url)]))
+      [(url->page (URL. url))]))
   (downloadForOption [_ _]
     (let [url (redis/test-url env)]
-      (url->page url))))
+      (url->page (URL. url)))))
 
 (defrecord DefaultDownloader []
   Downloader
@@ -48,7 +49,7 @@
           m (:month info)
           stock-ticker (:ticker info)
           unixtime (option/millis-for y m)
-          url (common/url-for stock-ticker unixtime)]
+          url (common/url-for stock-ticker (str unixtime))]
       (url->page url))))
 
 (defn demo []
