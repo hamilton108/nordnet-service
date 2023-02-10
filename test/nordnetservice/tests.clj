@@ -163,7 +163,13 @@
         calls (core/calls ctx 3 true)
         puts (core/puts ctx 3 true)
         find-call (fn [tik] (find-first #(= tik (:ticker %)) (:opx calls)))
-        find-put (fn [tik] (find-first #(= tik (:ticker %)) (:opx puts)))]
+        find-put (fn [tik] (find-first #(= tik (:ticker %)) (:opx puts)))
+        sp (:stock-price calls)]
+    (is (close-to? 452.0 (:o sp) 0.1))
+    (is (close-to? 458.9 (:h sp) 0.1))
+    (is (close-to? 450.6 (:l sp) 0.1))
+    (is (close-to? 452.6 (:c sp) 0.1))
+    (is (> (:unix-time sp) 0))
     (is (= 21 (count (:opx calls))))
     (is (= 21 (count (:opx puts))))
     (let [p1 (find-put "YAR3M528.02X")
@@ -177,7 +183,7 @@
       (is (not-nil? c1))
       (is (not-nil? c2))
       (is (close-to? 0.3046875 (:ivSell p1) 0.01))
-      (is (close-to? 0.0758 (:ivBuy p2) 0.01)) c1
+      (is (close-to? 0.0758 (:ivBuy p2) 0.01))
       (is (close-to? 0.0875 (:ivSell p2) 0.01))
       (is (close-to? 0.0375 (:ivBuy p3) 0.01))
       (is (close-to? 0.0594 (:ivSell p3) 0.01))

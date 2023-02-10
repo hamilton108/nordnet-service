@@ -5,17 +5,18 @@
    [nordnetservice.adapter.redisadapter :as redis]
    [nordnetservice.stockoption :as option]
    [nordnetservice.config :as config]
-   [nordnetservice.common :refer [oid->string find-first CALL PUT]])
+   [nordnetservice.common :refer [oid->string find-first unix-time CALL PUT]])
   (:import
    (vega.financial.calculator BlackScholes)
    (oahu.exceptions  BinarySearchException)
    (org.slf4j LoggerFactory)
+   (java.time LocalDate LocalTime)
    (java.util.concurrent TimeUnit)
    (com.github.benmanes.caffeine.cache Caffeine)))
 
 (def logger (LoggerFactory/getLogger "nordnetservice.core"))
 (def ca (-> (Caffeine/newBuilder) (.expireAfterWrite 5 TimeUnit/MINUTES) .build))
-(def ca-2 (-> (Caffeine/newBuilder) (.expireAfterWrite 5 TimeUnit/SECONDS) .build))
+(def ca-2 (-> (Caffeine/newBuilder) (.expireAfterWrite 5 TimeUnit/MINUTES) .build))
 
 (def calculator (BlackScholes.))
 
@@ -74,8 +75,9 @@
        (add-on cur-date info option)))))
 
 (defn add-on-stock-price [env stock-ticker stock-price]
-  (let [open-price (redis/opening-price env stock-ticker)]
-    (conj stock-price {:o open-price})))
+  (let [open-price (redis/opening-price env stock-ticker)
+        tm (unix-time (LocalDate/now) (LocalTime/now))]
+    (conj stock-price {:o open-price} {:unix-time tm})))
 
 (defn fetch-stock-options [{:keys [dl cur-date env]} oid]
   (let [ticker (oid->string oid)

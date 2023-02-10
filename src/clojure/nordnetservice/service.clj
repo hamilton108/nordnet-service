@@ -13,37 +13,37 @@
 
 
 (def stockoptions
-  (default-json-response ::stockoptions 200 true
+  (default-json-response ::stockoptions 200 false
                          (fn [req]
                            (let [oid (req-oid req)]
                              (core/stock-options ctx oid true)))))
 
 (def calls
-  (default-json-response ::calls 200 true
+  (default-json-response ::calls 200 false
                          (fn [req]
                            (let [oid (req-oid req)]
                              (core/calls ctx oid true)))))
 
 (def nocache-calls
-  (default-json-response ::nocache-calls 200 true
+  (default-json-response ::nocache-calls 200 false
                          (fn [req]
                            (let [oid (req-oid req)]
                              (core/calls ctx oid false)))))
 
 (def puts
-  (default-json-response ::puts 200 true
+  (default-json-response ::puts 200 false
                          (fn [req]
                            (let [oid (req-oid req)]
                              (core/puts ctx oid true)))))
 
 (def nocache-puts
-  (default-json-response ::nocache-puts 200 true
+  (default-json-response ::nocache-puts 200 false
                          (fn [req]
                            (let [oid (req-oid req)]
                              (core/puts ctx oid false)))))
 
 (def find-option
-  (default-json-response ::find-option 200 true
+  (default-json-response ::find-option 200 false
                          (fn [req]
                            (core/find-option ctx (option-ticker req)))))
 (def demo
