@@ -5,7 +5,11 @@
    [nordnetservice.config  :refer [get-context]]
    [nordnetservice.core :as core]
    [io.pedestal.http :as http]
-   [io.pedestal.http.route :as route]))
+   [io.pedestal.http.route :as route])
+  (:import
+   (org.slf4j LoggerFactory)))
+
+(def logger (LoggerFactory/getLogger "nordnetservice.service"))
 
 (def env :demo)
 
@@ -45,8 +49,16 @@
 (def find-option
   (default-json-response ::find-option 200 false
                          (fn [req]
-                           (core/find-option ctx (option-ticker req)))))
-(def demo
+                           (.info logger "Entering find-option")
+                           (let [t (option-ticker req)
+                                 result (core/find-option ctx t)]
+                             (.info logger (str "Ticker: " t))
+                             (.info logger (str "Result: " result))
+                             result))))
+
+                           ;(core/find-option ctx (option-ticker req)))))
+
+(comment
   (default-json-response ::demo 200 false
                          (fn [_]
                            {:a
@@ -68,7 +80,7 @@
      ["/nocache/puts/:oid" :get nocache-puts]
      ["/calls/:oid" :get calls]
      ["/puts/:oid" :get puts]
-     ["/demo" :get demo]
+     ;["/demo" :get demo]
      ["/option/:ticker" :get find-option]}))
 
 ;; Map-based routes

@@ -34,7 +34,7 @@
     :test
     (LocalDate/of 2022 9 25)
     :demo
-    (LocalDate/of 2022 1 1)))
+    (LocalDate/of 2022 9 25)))
 
 (defn repos [env factory]
   (stock-market-repos env factory))

@@ -15,8 +15,8 @@
    (com.github.benmanes.caffeine.cache Caffeine)))
 
 (def logger (LoggerFactory/getLogger "nordnetservice.core"))
-(def ca (-> (Caffeine/newBuilder) (.expireAfterWrite 5 TimeUnit/MINUTES) .build))
-(def ca-2 (-> (Caffeine/newBuilder) (.expireAfterWrite 5 TimeUnit/MINUTES) .build))
+(def ca (-> (Caffeine/newBuilder) (.expireAfterWrite 120 TimeUnit/MINUTES) .build))
+(def ca-2 (-> (Caffeine/newBuilder) (.expireAfterWrite 3 TimeUnit/SECONDS) .build))
 
 (def calculator (BlackScholes.))
 
