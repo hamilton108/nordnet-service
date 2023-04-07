@@ -9,7 +9,7 @@
    (java.time LocalDate)
    (java.net URL)
    (com.gargoylesoftware.htmlunit WebClient)
-   (nordnet.downloader PageInfo)))
+   (nordnetservice.downloader PageInfo)))
 
 (def web-client
   (let [result (WebClient.)]
@@ -17,7 +17,7 @@
     result))
 
 (defn url->page [^URL url]
-  (PageInfo. (.getPage ^WebClient web-client url) nil nil))
+  (PageInfo. (.getPage ^WebClient web-client url) nil))
 
     ;; private String urlFileFor(String ticker, String nordnetUnixTime) {
     ;;     return String.format("/market/options?currency=NOK&underlyingSymbol=%s&expireDate=%s", ticker,  nordnetUnixTime);

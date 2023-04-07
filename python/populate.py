@@ -120,6 +120,14 @@ def populate_splu(r):
     redis_key = "splu"
     r.hset(redis_key, "EQNR", "1620594773")
 
+def populate_test_url(db, r):
+    if db == 4:
+        redis_key = "demo-url"
+        redis_val =  "file:////home/rcs/opt/java/nordnet-service/test/resources/html/yar.html"
+    elif db == 5:
+        redis_key = "test-url"
+        redis_val =  "file:////home/rcs/opt/java/nordnet-service/test/resources/html/yar.html"
+    r.set(redis_key, redis_val)
 
 def populate(args):
     r = init_redis(args.db)
@@ -136,11 +144,15 @@ def populate(args):
         populate_opening_prices(r)
     if args.add_splu == True:
         populate_splu(r)
+    if args.add_test_url == True:
+        populate_test_url(args.db, r)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Populate Redis cache.')
+
     #parser.add_argument('integers', metavar='N', type=int, nargs='+',help='an integer for the accumulator')
+    
     parser.add_argument('--db', dest='db', metavar='DB', type=int,
                         default=4, help='Redis db: prod=0, demo=4, test=5. Default: demo')
 
@@ -158,6 +170,9 @@ if __name__ == '__main__':
 
     parser.add_argument('--splu', dest='add_splu', action='store_true',
                         default=False, help='Populate splu (stockprices last updated). default: false')
+
+    parser.add_argument('--test-url', dest='add_test_url', action='store_true',
+                        default=False, help='Add url to test-url (--db 5)/demo-url (db 4). default: false')
 
     args = parser.parse_args()
     populate(args)

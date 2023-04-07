@@ -5,7 +5,7 @@
    [clojure.core.match :refer [match]])
   (:import
    (org.jsoup.nodes Element)
-   (nordnet.downloader PageInfo)
+   (nordnetservice.downloader PageInfo)
    (java.util.regex Pattern Matcher)
    (org.jsoup Jsoup)))
 

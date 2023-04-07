@@ -37,7 +37,6 @@
 
                 ;------------------ Local libs ------------------ 
                  [rcstadheim/critter-repos "${critter}"]
-                 [rcstadheim/nordnet-repos "${nordnet}"]
                  [rcstadheim/oahu "${oahu}"]
                  [rcstadheim/vega "${vega}"]
 

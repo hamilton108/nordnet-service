@@ -5,8 +5,8 @@
    [clojure.core.match :refer [match]])
   (:import
    (java.time LocalDate)
-   (redis.clients.jedis Jedis)
-   (nordnet.financial OpeningPrices)))
+   (redis.clients.jedis Jedis)))
+   ;;(nordnet.financial OpeningPrices)))
 
 
 (def jedis
@@ -60,6 +60,6 @@
         op (.hget ^Jedis j "openingprices" ticker)]
     (Double/parseDouble op)))
 
-(defrecord OpeningPricesImpl [ctx]
-  OpeningPrices
-  (fetchPrice [_ ticker]))
+;; (defrecord OpeningPricesImpl [ctx]
+;;   OpeningPrices
+;;   (fetchPrice [_ ticker]))
