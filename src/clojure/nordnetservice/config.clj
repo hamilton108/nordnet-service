@@ -59,4 +59,5 @@
      :factory f
      :env env
      :cur-date (current-date env)
-     :purchase-type (if (= :prod env) 4 11)}))
+     ;(if (= :prod env) 4 11)}))
+     :purchase-type 11})) 

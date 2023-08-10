@@ -15,8 +15,8 @@
    (com.github.benmanes.caffeine.cache Caffeine)))
 
 (def logger (LoggerFactory/getLogger "nordnetservice.core"))
-(def ca (-> (Caffeine/newBuilder) (.expireAfterWrite 120 TimeUnit/MINUTES) .build))
-(def ca-2 (-> (Caffeine/newBuilder) (.expireAfterWrite 3 TimeUnit/SECONDS) .build))
+(def caffeine-1 (-> (Caffeine/newBuilder) (.expireAfterWrite 120 TimeUnit/MINUTES) .build))
+(def caffeine-2 (-> (Caffeine/newBuilder) (.expireAfterWrite 120 TimeUnit/MINUTES) .build))
 
 (def calculator (BlackScholes.))
 
@@ -93,19 +93,23 @@
 (defn stock-options [ctx oid has-cache]
   (if (= has-cache true)
     ;if ----------------------------------
-    (if-let [result (.getIfPresent ca oid)]
+    (if-let [result (.getIfPresent caffeine-1 oid)]
       (do
         (.info logger "Fetching from cache...")
         result)
       (let [result (fetch-stock-options ctx oid)]
         (.info logger "[stock-options] Empty cache...")
-        (.put ca oid result)
+        (.put caffeine-1 oid result)
         result))
     ;else ----------------------------------
     (let [result (fetch-stock-options ctx oid)]
       (.info logger "has-cache == false...")
-      (.put ca oid result)
+      (.put caffeine-1 oid result)
       result)))
+
+(defn get-stock-price [ctx oid]
+  (let [result (stock-options ctx oid true)]
+    (:stock-price result)))
 
 (defn calls-or-puts
   [ctx
@@ -128,14 +132,16 @@
 
 (defn populate-cache [info dl]
   (let [cached (download-and-parse info dl)]
-    (.put ca-2 (:ticker info) cached)))
+    (.put caffeine-2 (:ticker info) cached)))
 
 (defn get-cache [info dl]
-  (let [get-fn (fn [] (.getIfPresent ca-2 (:ticker info)))
+  (let [get-fn (fn [] (.getIfPresent caffeine-2 (:ticker info)))
         cached (if-let [tmp (get-fn)]
-                 tmp
                  (do
-                   (.info logger "[get-cache] Empty cache...")
+                   (.info logger (str "[get-cache] Cache hit for: " (:ticker info)))
+                   tmp)
+                 (do
+                   (.info logger (str "[get-cache] Empty cache for: " (:ticker info)))
                    (populate-cache info dl)
                    (get-fn)))]
     cached))
@@ -150,7 +156,7 @@
     (.info logger (str "[find-option] info: " info ", op: " calc-op))
     {:stock-price stock-price :option calc-op}))
 
-(defn demo []
+(comment demo []
   (let [ctx (config/get-context :test)]
     (prn ctx)
     (calls ctx 3 true)))
