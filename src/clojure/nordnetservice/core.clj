@@ -77,7 +77,7 @@
 (defn add-on-stock-price [env stock-ticker stock-price]
   (let [open-price (redis/opening-price env stock-ticker)
         tm (unix-time (LocalDate/now) (LocalTime/now))]
-    (conj stock-price {:o open-price} {:unix-time tm})))
+    (conj stock-price {:o open-price} {:unixtime tm})))
 
 (defn fetch-stock-options [{:keys [dl cur-date env]} oid]
   (let [ticker (oid->string oid)
