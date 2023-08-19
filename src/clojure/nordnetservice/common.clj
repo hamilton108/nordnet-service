@@ -1,6 +1,7 @@
 (ns nordnetservice.common
   (:gen-class)
   (:require
+   [clojure.java.io]
    [cheshire.core :as json])
   (:import
    (java.time
@@ -190,6 +191,13 @@
         d (.getDayOfMonth ld)
         d_str (if (< d 10) (str "0" d) (str d))]
     (str (.getYear ld) "-" m_str "-" d_str)))
+
+(defn load-properties
+  [url]
+  (with-open [^java.io.Reader reader (clojure.java.io/reader url)] 
+    (let [props (java.util.Properties.)]
+      (.load props reader)
+      (into {} (for [[k v] props] [(keyword k) (read-string v)])))))
 
 ;; (defn default-json-response
 ;;   [route-name

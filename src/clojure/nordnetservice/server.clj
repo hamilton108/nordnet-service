@@ -1,7 +1,9 @@
 (ns nordnetservice.server
   (:gen-class) ; for -main method in uberjar
   (:require [io.pedestal.http :as server]
-            [nordnetservice.service :as service]))
+            [clojure.java.io :as io]
+            [nordnetservice.service :as service]
+            [nordnetservice.common :refer [load-properties]]))
 
 ;; This is an adapted service map, that can be started and stopped
 ;; From the REPL you can call server/start and server/stop on this service
@@ -28,11 +30,39 @@
 ;;       server/create-server
 ;;       server/start))
 
+;;(with-open [in (io/input-stream (io/resource "file.dat"))] ;; resources/file.dat
+;;   (io/copy in (io/file "/path/to/extract/file.dat"))))
+
+(defn property-file-name [profile] 
+  (let [fname 
+        (if (= profile nil) 
+          "application.properties"
+          (str "application-" profile ".properties"))]
+    fname))
+    
+    
+(defn read-property-file [profile]
+  (let [fname (property-file-name profile)
+        url (io/resource fname)]
+    (load-properties url)))
+
+(defn read-properties [args]
+  (let [profile (first args)
+        defaults (read-property-file nil)]
+    (if (= profile nil)
+      defaults
+      (let [profile-props (read-property-file profile)]
+        (merge defaults profile-props)))))
+
+
 (defn -main
   "The entry-point for 'lein run'"
   [& args]
   (println "\nCreating your server...")
-  (server/start runnable-service))
+  (prn (read-properties args)))
+
+  
+  ;(server/start runnable-service))
 
 ;; If you package the service up as a WAR,
 ;; some form of the following function sections is required (for io.pedestal.servlet.ClojureVarServlet).
@@ -53,3 +83,28 @@
 ;;  (server/servlet-destroy @servlet)
 ;;  (reset! servlet nil))
 
+
+
+;; import java.io.BufferedInputStream;
+;; import java.io.InputStream;
+;; import java.io.InputStreamReader;
+;; import java.io.Reader;
+;; import java.net.URL;
+
+;; public class MainClass {
+
+;;   public static void main(String[] args) throws Exception {
+
+;;     URL u = new URL("http://www.java2s.com");
+;;     InputStream in = u.openStream();
+
+;;     in = new BufferedInputStream(in);
+
+;;     Reader r = new InputStreamReader(in);
+;;     int c;
+;;     while ((c = r.read()) != -1) {
+;;       System.out.print((char) c);
+;;     }
+;;   }
+
+;; }
