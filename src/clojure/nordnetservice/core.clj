@@ -107,7 +107,7 @@
       (.put caffeine-1 oid result)
       result)))
 
-(defn get-stock-price [ctx oid]
+(defn get-spot [ctx oid]
   (let [result (stock-options ctx oid true)]
     (:stock-price result)))
 

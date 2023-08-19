@@ -11,8 +11,8 @@
 
 (def logger (LoggerFactory/getLogger "nordnetservice.service"))
 
-;(def env :demo)
-(def env :prod)
+(def env :demo)
+;(def env :prod)
 
 (def ctx (get-context env))
 
@@ -59,11 +59,11 @@
 
                            ;(core/find-option ctx (option-ticker req)))))
 
-(def stock-price 
+(def spot 
   (default-json-response ::stock-price 200 false
                          (fn [req]
                            (let [oid (req-oid req)]
-                             (core/get-stock-price ctx oid)))))
+                             (core/get-spot ctx oid)))))
 (comment
   (default-json-response ::demo 200 false
                          (fn [_]
@@ -86,7 +86,7 @@
      ["/nocache/puts/:oid" :get nocache-puts]
      ["/calls/:oid" :get calls]
      ["/puts/:oid" :get puts]
-     ["/stockprice/:oid" :get stock-price]
+     ["/spot/:oid" :get spot]
      ;["/demo" :get demo]
      ["/option/:ticker" :get find-option]}))
 

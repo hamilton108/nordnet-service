@@ -123,7 +123,7 @@ def populate_splu(r):
 def populate_test_url(db, r):
     if db == 4:
         redis_key = "demo-url"
-        redis_val =  "file:////home/rcs/opt/java/nordnet-service/test/resources/html/yar.html"
+        redis_val =  "file:////home/rcs/opt/java/nordnet-service/test/resources/html/yar2.html"
     elif db == 5:
         redis_key = "test-url"
         redis_val =  "file:////home/rcs/opt/java/nordnet-service/test/resources/html/yar.html"
