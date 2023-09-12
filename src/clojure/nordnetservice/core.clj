@@ -15,8 +15,13 @@
    (com.github.benmanes.caffeine.cache Caffeine)))
 
 (def logger (LoggerFactory/getLogger "nordnetservice.core"))
-(def caffeine-1 (-> (Caffeine/newBuilder) (.expireAfterWrite 120 TimeUnit/MINUTES) .build))
-(def caffeine-2 (-> (Caffeine/newBuilder) (.expireAfterWrite 120 TimeUnit/MINUTES) .build))
+
+(def expiry-options (atom {:interval 120 :unit TimeUnit/MINUTES}))
+(def expiry-fetch-option (atom {:interval 120 :unit TimeUnit/MINUTES}))
+
+(def caffeine-1 (-> (Caffeine/newBuilder) (.expireAfterWrite (:interval @expiry-options) (:unit @expiry-options) .build))
+;(def caffeine-2 (-> (Caffeine/newBuilder) (.expireAfterWrite 120 TimeUnit/MINUTES) .build))
+(def caffeine-2 (-> (Caffeine/newBuilder) (.expireAfterWrite (:interval @expiry-fetch-option) (:unit @expiry-fetch-option) .build))
 
 (def calculator (BlackScholes.))
 

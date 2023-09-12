@@ -28,11 +28,37 @@
 ;;       server/create-server
 ;;       server/start))
 
+(defn parse-args [args]
+  (if (= (ount args) 0)
+    {:profile "demo" }
+    )
 (defn -main
   "The entry-point for 'lein run'"
   [& args]
-  (println "\nCreating your server...")
-  (server/start runnable-service))
+  (let [args0 (first args)
+       profile (keyword (if (= args0 nil) "demo" args0))]
+    (println "\nPROFILE: " profile)))
+    ;(service/init-profile profile)
+    ;(server/start runnable-service)))
+
+;; Another option is to store the call to the constructor as an anonymous function. In our case:
+;; (def a #(String. %1))
+;; (a "111"); "111"
+
+;; The most elegant solution is to write construct that does the same as new but is able to receive a class dynamically:
+;; This solution overcomes the limitation of @mikera's answer (see comments).
+;;  (defn construct [klass & args]
+;;     (clojure.lang.Reflector/invokeConstructor klass (into-array Object args)))
+;;  (def a HashSet)
+;;  (construct a '(1 2 3)); It works!!!
+
+;; Mikera's answer:
+;; (defn construct [klass & args]
+;;   (.newInstance
+;;     (.getConstructor klass (into-array java.lang.Class (map type args)))
+;;     (object-array args)))
+
+;; (construct a "Foobar!")
 
 ;; If you package the service up as a WAR,
 ;; some form of the following function sections is required (for io.pedestal.servlet.ClojureVarServlet).

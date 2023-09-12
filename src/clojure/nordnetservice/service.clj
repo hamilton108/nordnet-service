@@ -11,48 +11,50 @@
 
 (def logger (LoggerFactory/getLogger "nordnetservice.service"))
 
-(def env :demo)
-;(def env :prod)
+(def env (atom nil))
 
-(def ctx (get-context env))
+(def ctx (atom nil))
 
+(defn init-profile [profile]
+ (reset! env profile)
+ (reset! ctx (get-context profile)))
 
 (def stockoptions
   (default-json-response ::stockoptions 200 false
                          (fn [req]
                            (let [oid (req-oid req)]
-                             (core/stock-options ctx oid true)))))
+                             (core/stock-options @ctx oid true)))))
 
 (def calls
   (default-json-response ::calls 200 false
                          (fn [req]
                            (let [oid (req-oid req)]
-                             (core/calls ctx oid true)))))
+                             (core/calls @ctx oid true)))))
 
 (def nocache-calls
   (default-json-response ::nocache-calls 200 false
                          (fn [req]
                            (let [oid (req-oid req)]
-                             (core/calls ctx oid false)))))
+                             (core/calls @ctx oid false)))))
 
 (def puts
   (default-json-response ::puts 200 false
                          (fn [req]
                            (let [oid (req-oid req)]
-                             (core/puts ctx oid true)))))
+                             (core/puts @ctx oid true)))))
 
 (def nocache-puts
   (default-json-response ::nocache-puts 200 false
                          (fn [req]
                            (let [oid (req-oid req)]
-                             (core/puts ctx oid false)))))
+                             (core/puts @ctx oid false)))))
 
 (def find-option
   (default-json-response ::find-option 200 false
                          (fn [req]
                            (.info logger "Entering find-option")
                            (let [t (option-ticker req)
-                                 result (core/find-option ctx t)]
+                                 result (core/find-option @ctx t)]
                              (.info logger (str "Ticker: " t))
                              (.info logger (str "Result: " result))
                              result))))
@@ -63,7 +65,7 @@
   (default-json-response ::stock-price 200 false
                          (fn [req]
                            (let [oid (req-oid req)]
-                             (core/get-spot ctx oid)))))
+                             (core/get-spot @ctx oid)))))
 (comment
   (default-json-response ::demo 200 false
                          (fn [_]
@@ -135,7 +137,8 @@
               ;; Either :jetty, :immutant or :tomcat (see comments in project.clj)
               ;;  This can also be your own chain provider/server-fn -- http://pedestal.io/reference/architecture-overview#_chain_provider
               ::http/type :jetty
-              ;;::http/host "localhost"
+              ;; ::http/host "localhost"
+              ::http/host "0.0.0.0"
               ::http/port 8082
               ;; Options to pass to the container (Jetty)
               ::http/container-options {:h2c? true
