@@ -36,10 +36,8 @@
                   :exclusions [org.eclipse.jetty/jetty-http org.eclipse.jetty/jetty-io]]
 
                 ;------------------ Local libs ------------------ 
-                 [rcstadheim/critter-repos "3.0.0-20230113.105404-27"]
-                 [rcstadheim/nordnet-repos "3.0.0-20230117.204141-11"]
-                 [rcstadheim/oahu "3.0.0-20220413.092122-1"]
-                 [rcstadheim/vega "3.0.0-20220413.092302-1"]
+                 [rcstadheim/oahu "3.0.0-SNAPSHOT-plain"]
+                 [rcstadheim/vega "3.0.0-SNAPSHOT-plain"]
 
                 ;------------------ Diverse  ------------------ 
                  [colt/colt "1.2.0"]

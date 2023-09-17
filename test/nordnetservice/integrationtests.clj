@@ -16,12 +16,12 @@
     (prn url)
     (url->page url)))
 
-(deftest test-download-and-parse-yar
-  (let [pi (page-info)]
-    (is (not-nil? (.getPage pi)))
-    (let [result (parse-2 pi)]
-      (prn result)
-      (is (not-nil? result))
-      (is (not-nil? (:stock-price result)))
-      (is (not-nil? (:opx result))))))
+;; (deftest test-download-and-parse-yar
+;;   (let [pi (page-info)]
+;;     (is (not-nil? (.getPage pi)))
+;;     (let [result (parse-2 pi)]
+;;       (prn result)
+;;       (is (not-nil? result))
+;;       (is (not-nil? (:stock-price result)))
+;;       (is (not-nil? (:opx result))))))
 

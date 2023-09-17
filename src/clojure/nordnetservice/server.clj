@@ -31,7 +31,8 @@
 (defn parse-args [args]
   (if (= (ount args) 0)
     {:profile "demo" }
-    )
+    ))
+
 (defn -main
   "The entry-point for 'lein run'"
   [& args]

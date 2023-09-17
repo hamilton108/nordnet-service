@@ -15,14 +15,14 @@
          c (count (filter #(> % 0) (map #(.indexOf (.getName %) interface) i)))]
     (> c 0)))
 
-(deftest test-repos
-  (let [interface "StockMarketRepository"
-        prod (config/repos :prod nil)
-        tst (config/repos :test nil)
-        demo (config/repos :demo nil)]
-    (is (= (implements prod interface) true))
-    (is (= (implements tst  interface) true))
-    (is (= (implements demo interface) true))))
+;; (deftest test-repos
+;;   (let [interface "StockMarketRepository"
+;;         prod (config/repos :prod nil)
+;;         tst (config/repos :test nil)
+;;         demo (config/repos :demo nil)]
+;;     (is (= (implements prod interface) true))
+;;     (is (= (implements tst  interface) true))
+;;     (is (= (implements demo interface) true))))
 
 ;(def test-date (LocalDate/of 2023 3 30))
 
@@ -169,7 +169,7 @@
     (is (close-to? 458.9 (:h sp) 0.1))
     (is (close-to? 450.6 (:l sp) 0.1))
     (is (close-to? 452.6 (:c sp) 0.1))
-    (is (> (:unix-time sp) 0))
+    (is (> (:unixtime sp) 0))
     (is (= 21 (count (:opx calls))))
     (is (= 21 (count (:opx puts))))
     (let [p1 (find-put "YAR3M528.02X")

@@ -5,9 +5,10 @@ import critter.stock.Stock;
 import critter.stock.StockPrice;
 import critter.stockoption.StockOption;
 import critter.stockoption.StockOptionPrice;
-import critter.stockoption.StockOptionPurchase;
+//import critter.stockoption.StockOptionPurchase;
 import vega.financial.calculator.BlackScholes;
 import vega.financial.calculator.OptionCalculator;
+import vega.financial.StockOptionType;
 
 public class StockMarketFactory {
     private final LocalDate currentDate;
@@ -56,7 +57,7 @@ public class StockMarketFactory {
 
     public StockOption createStockOption(String ticker,
                                          double x,
-                                         StockOption.OptionType optionType,
+                                         StockOptionType optionType,
                                          StockPrice stockPrice) {
 
         StockOption so = new StockOption();
@@ -87,7 +88,7 @@ public class StockMarketFactory {
     public StockOptionPrice nhy() {
         StockPrice sp = createStockPrice(1, 69.52, 71.9, 68.94, 70.98);
         StockOption opt = createStockOption("NHY2L58", 58.0,
-                                                StockOption.OptionType.CALL, sp);
+                                                StockOptionType.CALL, sp);
         return createStockOptionPrice(opt, sp, 16.00, 18.00, optionCalculator);
     }
     public StockOptionPrice yar(String optionTicker,
@@ -97,10 +98,11 @@ public class StockMarketFactory {
                                 double stockPrice) {
         StockPrice sp = createStockPrice(3, 0.9*stockPrice, 1.1*stockPrice, 0.8*stockPrice, stockPrice);
         StockOption opt = createStockOption(optionTicker, x,
-                StockOption.OptionType.CALL, sp);
+                StockOptionType.CALL, sp);
         return createStockOptionPrice(opt, sp, bid, ask, optionCalculator);
     }
 
+    /*
     public StockOptionPurchase createPurchase(StockOptionPrice price) {
         var p = new StockOptionPurchase();
         p.setOptionName(price.getTicker());
@@ -112,4 +114,5 @@ public class StockMarketFactory {
         p.setExpirySql(expiry);
         return p;
     }
+    */
 }

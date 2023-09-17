@@ -2,8 +2,8 @@
   (:require
    [clojure.core.match :refer [match]]
    [nordnetservice.adapter.downloadadapter]
-   [nordnetservice.adapter.redisadapter]
-   [nordnetservice.adapter.critteradapter :refer [stock-market-repos]])
+   [nordnetservice.adapter.redisadapter])
+   ;[nordnetservice.adapter.critteradapter :refer [stock-market-repos]])
   (:import
    (nordnetservice.factory StockMarketFactory)
    (nordnetservice.adapter.downloadadapter
@@ -36,8 +36,8 @@
     :demo
     (LocalDate/of 2023 8 12)))
 
-(defn repos [env factory]
-  (stock-market-repos env factory))
+;; (defn repos [env factory]
+;;   (stock-market-repos env factory))
 
 ;; (defn etrade [env factory]
 ;;   (let [calc (BlackScholes.)]

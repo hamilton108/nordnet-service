@@ -36,7 +36,6 @@
                   :exclusions [org.eclipse.jetty/jetty-http org.eclipse.jetty/jetty-io]]
 
                 ;------------------ Local libs ------------------ 
-                 [rcstadheim/critter-repos "${critter}"]
                  [rcstadheim/oahu "${oahu}"]
                  [rcstadheim/vega "${vega}"]
 

@@ -5,6 +5,7 @@ import critter.stock.StockPrice;
 import critter.stockoption.StockOption;
 import critter.stockoption.StockOptionPrice;
 import critter.util.DateUtil;
+import vega.financial.StockOptionType;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -28,7 +29,7 @@ public class OptionDTO {
 
     @JsonIgnore
     public boolean isCall() {
-        return price.getStockOption().getOpType() == StockOption.OptionType.CALL;
+        return price.getStockOption().getOpType() == StockOptionType.CALL;
     }
 
     public String getTicker() {
